@@ -1,0 +1,13 @@
+*
+!.gitignore
+!CMakeLists.txt
+!*.h
+!*.hpp
+!*.c
+!*.cpp
+!*.ui
+!*.qrc
+!*.ico
+!*.png
+!PG_Libs/
+!*.dll
