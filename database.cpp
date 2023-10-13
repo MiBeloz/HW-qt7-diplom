@@ -11,36 +11,36 @@ DataBase::~DataBase()
     delete dataBase;
 }
 
-void DataBase::AddDataBase(QString driver, QString nameDB)
+void DataBase::addDataBase(QString driver, QString nameDB)
 {
     *dataBase = QSqlDatabase::addDatabase(driver, nameDB);
 }
 
-void DataBase::ConnectToDataBase(QVector<QString> data)
+void DataBase::connectToDataBase(QList<QString> &dataForConnect)
 {
-    dataBase->setHostName(data[hostName]);
-    dataBase->setDatabaseName(data[dbName]);
-    dataBase->setUserName(data[login]);
-    dataBase->setPassword(data[pass]);
-    dataBase->setPort(data[port].toInt());
+    dataBase->setHostName(dataForConnect[hostName]);
+    dataBase->setDatabaseName(dataForConnect[dbName]);
+    dataBase->setPort(dataForConnect[port].toInt());
+    dataBase->setUserName(dataForConnect[login]);
+    dataBase->setPassword(dataForConnect[pass]);
 
     bool status;
     status = dataBase->open();
     emit sig_SendStatusConnection(status);
 }
 
-void DataBase::DisconnectFromDataBase(QString nameDb)
+void DataBase::disconnectFromDataBase(QString nameDb)
 {
     *dataBase = QSqlDatabase::database(nameDb);
     dataBase->close();
 }
 
-void DataBase::RequestToDB(QString request, int requestType)
+void DataBase::requestToDB(QString request, int requestType)
 {
 
 }
 
-QSqlError DataBase::GetLastError()
+QSqlError DataBase::getLastError()
 {
     return dataBase->lastError();
 }

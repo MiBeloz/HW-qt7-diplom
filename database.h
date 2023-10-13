@@ -6,15 +6,14 @@
 #include <QSqlError>
 
 #define POSTGRE_DRIVER "QPSQL"
-#define DB_NAME "MyDB"
 #define NUM_DATA_FOR_CONNECT_TO_DB 5
 
 enum fieldsForConnect{
     hostName = 0,
     dbName = 1,
-    login = 2,
-    pass = 3,
-    port = 4
+    port = 2,
+    login = 3,
+    pass = 4
 };
 
 class DataBase : public QObject
@@ -24,11 +23,11 @@ public:
     explicit DataBase(QObject *parent = nullptr);
     ~DataBase();
 
-    void AddDataBase(QString driver, QString nameDB = "");
-    void DisconnectFromDataBase(QString nameDb = "");
-    void RequestToDB(QString request, int requestType);
-    QSqlError GetLastError(void);
-    void ConnectToDataBase(QVector<QString> dataForConnect);
+    void addDataBase(QString driver, QString nameDB = "");
+    void connectToDataBase(QList<QString> &dataForConnect);
+    void disconnectFromDataBase(QString nameDb = "");
+    void requestToDB(QString request, int requestType);
+    QSqlError getLastError(void);
 
 signals:
    //void sig_SendDataFromDB(const QTableView *tableView, int typeR);

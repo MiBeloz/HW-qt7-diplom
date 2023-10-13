@@ -11,3 +11,6 @@
 !*.png
 !PG_Libs/
 !*.dll
+!build/
+!build/Debug/
+!build/Debug/settings.ini
