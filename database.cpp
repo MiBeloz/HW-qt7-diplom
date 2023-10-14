@@ -3,36 +3,36 @@
 DataBase::DataBase(QObject *parent)
     : QObject{parent}
 {
-    dataBase = new QSqlDatabase();
+    pDataBase = new QSqlDatabase();
 }
 
 DataBase::~DataBase()
 {
-    delete dataBase;
+    delete pDataBase;
 }
 
 void DataBase::addDataBase(QString driver, QString nameDB)
 {
-    *dataBase = QSqlDatabase::addDatabase(driver, nameDB);
+    *pDataBase = QSqlDatabase::addDatabase(driver, nameDB);
 }
 
-void DataBase::connectToDataBase(QList<QString> &dataForConnect)
+void DataBase::connectToDataBase(QVector<QString> &dataForConnect)
 {
-    dataBase->setHostName(dataForConnect[hostName]);
-    dataBase->setDatabaseName(dataForConnect[dbName]);
-    dataBase->setPort(dataForConnect[port].toInt());
-    dataBase->setUserName(dataForConnect[login]);
-    dataBase->setPassword(dataForConnect[pass]);
+    pDataBase->setHostName(dataForConnect[hostName]);
+    pDataBase->setDatabaseName(dataForConnect[dbName]);
+    pDataBase->setPort(dataForConnect[port].toInt());
+    pDataBase->setUserName(dataForConnect[login]);
+    pDataBase->setPassword(dataForConnect[pass]);
 
     bool status;
-    status = dataBase->open();
+    status = pDataBase->open();
     emit sig_SendStatusConnection(status);
 }
 
 void DataBase::disconnectFromDataBase(QString nameDb)
 {
-    *dataBase = QSqlDatabase::database(nameDb);
-    dataBase->close();
+    *pDataBase = QSqlDatabase::database(nameDb);
+    pDataBase->close();
 }
 
 void DataBase::requestToDB(QString request, int requestType)
@@ -42,5 +42,5 @@ void DataBase::requestToDB(QString request, int requestType)
 
 QSqlError DataBase::getLastError()
 {
-    return dataBase->lastError();
+    return pDataBase->lastError();
 }

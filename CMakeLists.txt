@@ -22,6 +22,13 @@ set(PROJECT_SOURCES
         mainwindow.ui
         database.cpp
         database.h
+        settings.cpp
+        settings.h
+        formsettings.cpp
+        formsettings.h
+        formsettings.ui
+        structs.h
+        images.qrc
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

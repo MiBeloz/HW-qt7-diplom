@@ -2,11 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QSettings>
+#include <QLabel>
 
 #include "database.h"
-
-#define SETTINGS_FILE "settings.ini"
+#include "settings.h"
+#include "formsettings.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -28,7 +28,13 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QList<QString> dataForConnect;
+    QVector<QString> dataForConnect;
+    QVector<QString> dataForApp;
+    Settings *pSettings;
     DataBase *pDatabase;
+
+    QLabel lb_statusPixmap;
+    QLabel lb_statusText;
+    QPixmap pixmapStatus;
 };
 #endif // MAINWINDOW_H
