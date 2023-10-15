@@ -3,36 +3,38 @@
 DataBase::DataBase(QObject *parent)
     : QObject{parent}
 {
-    pDataBase = new QSqlDatabase();
+    pDatabase = new QSqlDatabase();
 }
 
 DataBase::~DataBase()
 {
-    delete pDataBase;
+    delete pDatabase;
 }
 
-void DataBase::addDataBase(QString driver, QString nameDB)
+void DataBase::addDatabaseDriver(QString driver)
 {
-    *pDataBase = QSqlDatabase::addDatabase(driver, nameDB);
+    *pDatabase = QSqlDatabase::addDatabase(driver);
 }
 
-void DataBase::connectToDataBase(QVector<QString> &dataForConnect)
+void DataBase::addDatabaseData(QVector<QString> dataForConnect)
 {
-    pDataBase->setHostName(dataForConnect[hostName]);
-    pDataBase->setDatabaseName(dataForConnect[dbName]);
-    pDataBase->setPort(dataForConnect[port].toInt());
-    pDataBase->setUserName(dataForConnect[login]);
-    pDataBase->setPassword(dataForConnect[pass]);
+    pDatabase->setHostName(dataForConnect[hostName]);
+    pDatabase->setDatabaseName(dataForConnect[dbName]);
+    pDatabase->setPort(dataForConnect[port].toInt());
+    pDatabase->setUserName(dataForConnect[login]);
+    pDatabase->setPassword(dataForConnect[pass]);
+}
 
+void DataBase::connectToDatabase()
+{
     bool status;
-    status = pDataBase->open();
+    status = pDatabase->open();
     emit sig_SendStatusConnection(status);
 }
 
-void DataBase::disconnectFromDataBase(QString nameDb)
+void DataBase::disconnectFromDatabase()
 {
-    *pDataBase = QSqlDatabase::database(nameDb);
-    pDataBase->close();
+    pDatabase->close();
 }
 
 void DataBase::requestToDB(QString request, int requestType)
@@ -42,5 +44,17 @@ void DataBase::requestToDB(QString request, int requestType)
 
 QSqlError DataBase::getLastError()
 {
-    return pDataBase->lastError();
+    return pDatabase->lastError();
+}
+
+bool DataBase::checkDatabase(QVector<QString> dataForConnect)
+{
+    if (pDatabase->hostName() != dataForConnect[hostName] ||
+        pDatabase->databaseName() != dataForConnect[dbName] ||
+        pDatabase->port() != dataForConnect[port].toInt() ||
+        pDatabase->userName() != dataForConnect[login] ||
+        pDatabase->password() != dataForConnect[pass]){
+        return false;
+    }
+    return true;
 }

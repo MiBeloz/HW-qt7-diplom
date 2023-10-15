@@ -12,12 +12,13 @@ class Settings : public QObject
 public:
     explicit Settings(QObject *parent = nullptr);
 
-public slots:
-    void writeSettingsApp(QVector<QString> &appSettings);
-    void writeSettingsDB(QVector<QString> &dbSettings);
-    void readSettingsAll(QVector<QString> &appSettings, QVector<QString> &dbSettings);
-
 signals:
+     void sig_sendSettings(QVector<QString> appSettings, QVector<QString> dbSettings);
+
+public slots:
+    void writeSettingsApp(QVector<QString> appSettings);
+    void writeSettingsAll(QVector<QString> appSettings, QVector<QString> dbSettings);
+    void readSettingsAll(QVector<QString> appSettings, QVector<QString> dbSettings);
 
 private:
     QSettings *pSettings;

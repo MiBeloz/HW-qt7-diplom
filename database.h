@@ -14,18 +14,20 @@ public:
     explicit DataBase(QObject *parent = nullptr);
     ~DataBase();
 
-    void addDataBase(QString driver, QString nameDB = "");
-    void connectToDataBase(QVector<QString> &dataForConnect);
-    void disconnectFromDataBase(QString nameDb = "");
+    void addDatabaseDriver(QString driver);
+    void addDatabaseData(QVector<QString> dataForConnect);
+    void connectToDatabase();
+    void disconnectFromDatabase();
     void requestToDB(QString request, int requestType);
     QSqlError getLastError(void);
+    bool checkDatabase(QVector<QString> dataForConnect);
 
 signals:
    //void sig_SendDataFromDB(const QTableView *tableView, int typeR);
    void sig_SendStatusConnection(bool);
 
 private:
-    QSqlDatabase* pDataBase;
+    QSqlDatabase* pDatabase;
 };
 
 #endif // DATABASE_H
