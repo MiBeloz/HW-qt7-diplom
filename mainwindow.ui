@@ -48,16 +48,52 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
-          <widget class="QRadioButton" name="radioButton">
+          <widget class="QComboBox" name="cbox_listAirports"/>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="rb_in">
            <property name="text">
-            <string>RadioButton</string>
+            <string>Прилет</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="radioButton_2">
+          <widget class="QRadioButton" name="rb_out">
            <property name="text">
-            <string>RadioButton</string>
+            <string>Вылет</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDateEdit" name="dateE_date">
+           <property name="maximumDateTime">
+            <datetime>
+             <hour>23</hour>
+             <minute>59</minute>
+             <second>59</second>
+             <year>2017</year>
+             <month>9</month>
+             <day>14</day>
+            </datetime>
+           </property>
+           <property name="minimumDateTime">
+            <datetime>
+             <hour>0</hour>
+             <minute>0</minute>
+             <second>0</second>
+             <year>2016</year>
+             <month>8</month>
+             <day>15</day>
+            </datetime>
+           </property>
+           <property name="currentSection">
+            <enum>QDateTimeEdit::DaySection</enum>
+           </property>
+           <property name="calendarPopup">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -71,9 +107,9 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="pb_getFlight">
            <property name="text">
-            <string>PushButton</string>
+            <string>Получить список рейсов</string>
            </property>
           </widget>
          </item>
@@ -94,7 +130,7 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QListView" name="lv_flights"/>
+          <widget class="QTableView" name="tv_flights"/>
          </item>
         </layout>
        </widget>
@@ -109,7 +145,7 @@
      <x>0</x>
      <y>0</y>
      <width>572</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="file">

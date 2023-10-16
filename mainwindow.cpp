@@ -7,6 +7,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    //ui->cbox_listAirports->setVisible(false);
+
     stopConnection = new QPushButton("Отмена", this);
     stopConnection->setVisible(false);
     lb_statusText.setMinimumSize(250, 22);
@@ -51,6 +53,9 @@ MainWindow::MainWindow(QWidget *parent)
         stopConnection->setVisible(false);
         lb_statusText.setText("Отключено");
     });
+
+    QObject::connect(pDatabase, &DataBase::sig_SendDataFromDB, this, &MainWindow::ReceiveSendDataFromDB);
+    QObject::connect(pDatabase, &DataBase::sig_SendDataFromDBIn, this, &MainWindow::ReceiveSendDataFromDBIn);
 
     pSettings->readSettingsAll(dataForApp, dataForConnect);
     pSettings->writeSettingsAll(dataForApp, dataForConnect);
@@ -117,6 +122,8 @@ void MainWindow::ReceiveStatusConnection(bool status)
         stopConnection->setVisible(false);
         secondsPassed = 0;
         connectionAttempts = 0;
+
+        pDatabase->requestToDBListAirports(QUERY_LIST_AIROPORTS);
     }
     else{
         pixmapStatus.load(":/status/disconnect.png");
@@ -161,6 +168,19 @@ void MainWindow::ReceiveTimerTimeout()
     }
 }
 
+void MainWindow::ReceiveSendDataFromDB(const QComboBox *pComboBox)
+{
+    ui->cbox_listAirports->setModel(pComboBox->model());
+    //ui->cbox_listAirports->model()->sort(1);
+    qDebug() << ui->cbox_listAirports->itemText(0);
+    qDebug() << ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(0,1)).toString();
+}
+
+void MainWindow::ReceiveSendDataFromDBIn(const QTableView *pTableView)
+{
+    ui->tv_flights->setModel(pTableView->model());
+}
+
 void MainWindow::on_settings_triggered()
 {
     pFormSettings->ReceiveSendSettings(dataForApp, dataForConnect);
@@ -188,3 +208,7 @@ void MainWindow::moveToTopCenter()
     move(center);    //перемещаем
 }
 
+void MainWindow::on_pb_getFlight_clicked()
+{
+    pDatabase->requestToDBListIn(QUERY_LIST_IN);
+}

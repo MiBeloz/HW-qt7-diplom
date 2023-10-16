@@ -4,6 +4,10 @@
 #include <QObject>
 #include <QSqlDatabase>
 #include <QSqlError>
+#include <QSqlQueryModel>
+#include <QComboBox>
+#include <QSqlTableModel>
+#include <QTableView>
 
 #include "structs.h"
 
@@ -18,16 +22,22 @@ public:
     void addDatabaseData(QVector<QString> dataForConnect);
     void connectToDatabase();
     void disconnectFromDatabase();
-    void requestToDB(QString request, int requestType);
+    void requestToDBListAirports(QString request);
+    void requestToDBListIn(QString request);
     QSqlError getLastError(void);
     bool checkDatabase(QVector<QString> dataForConnect);
 
 signals:
-   //void sig_SendDataFromDB(const QTableView *tableView, int typeR);
+   void sig_SendDataFromDB(const QComboBox *pComboBox);
+   void sig_SendDataFromDBIn(const QTableView *pTableView);
    void sig_SendStatusConnection(bool);
 
 private:
     QSqlDatabase* pDatabase;
+    QSqlQueryModel *pQueryModel;
+    QComboBox *pComboBox;
+    QSqlTableModel *pTableModel;
+    QTableView *pTableView;
 };
 
 #endif // DATABASE_H

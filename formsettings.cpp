@@ -38,21 +38,35 @@ FormSettings::FormSettings(QWidget *parent) :
     QObject::connect(ui->chB_saveMainWindowSize, &QCheckBox::stateChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-    QObject::connect(ui->spB_mainWindowWidth, &QSpinBox::valueChanged, this, [&]{
+
+//    QObject::connect(ui->spB_mainWindowWidth, &QSpinBox::valueChanged, this, [&]{
+//        ui->pb_save->setEnabled(true);
+//    });
+    QObject::connect(ui->spB_mainWindowWidth, &QSpinBox::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-    QObject::connect(ui->spB_mainWindowHeight, &QSpinBox::valueChanged, this, [&]{
+
+//    QObject::connect(ui->spB_mainWindowHeight, &QSpinBox::valueChanged, this, [&]{
+//        ui->pb_save->setEnabled(true);
+//    });
+    QObject::connect(ui->spB_mainWindowHeight, &QSpinBox::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
+
     QObject::connect(ui->le_hostname, &QLineEdit::textEdited, this, [&]{
         ui->pb_save->setEnabled(true);
     });
     QObject::connect(ui->le_dbName, &QLineEdit::textEdited, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-    QObject::connect(ui->spB_port, &QSpinBox::valueChanged, this, [&]{
+
+//    QObject::connect(ui->spB_port, &QSpinBox::valueChanged, this, [&]{
+//        ui->pb_save->setEnabled(true);
+//    });
+    QObject::connect(ui->spB_port, &QSpinBox::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
+
     QObject::connect(ui->le_login, &QLineEdit::textEdited, this, [&]{
         ui->pb_save->setEnabled(true);
     });
@@ -68,10 +82,17 @@ FormSettings::FormSettings(QWidget *parent) :
     QObject::connect(ui->chB_autoConnect, &QCheckBox::stateChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-    QObject::connect(ui->spB_numOfConnectionAttempts, &QSpinBox::valueChanged, this, [&]{
+
+//    QObject::connect(ui->spB_numOfConnectionAttempts, &QSpinBox::valueChanged, this, [&]{
+//        ui->pb_save->setEnabled(true);
+//    });
+//    QObject::connect(ui->spB_timeout, &QSpinBox::valueChanged, this, [&]{
+//        ui->pb_save->setEnabled(true);
+//    });
+    QObject::connect(ui->spB_numOfConnectionAttempts, &QSpinBox::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-    QObject::connect(ui->spB_timeout, &QSpinBox::valueChanged, this, [&]{
+    QObject::connect(ui->spB_timeout, &QSpinBox::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
 }

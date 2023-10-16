@@ -1,11 +1,15 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QDebug>
+
 #include <QMainWindow>
 #include <QLabel>
 #include <QResizeEvent>
+#include <QScreen>
 #include <QMessageBox>
 #include <QTimer>
+
 
 #include "database.h"
 #include "settings.h"
@@ -31,8 +35,12 @@ private slots:
     void ReceiveSendSettings(QVector<QString> appSettings, QVector<QString> dbSettings);
     void ReceiveStatusConnection(bool status);
     void ReceiveTimerTimeout();
+    void ReceiveSendDataFromDB(const QComboBox *pComboBox);
+    void ReceiveSendDataFromDBIn(const QTableView *pTableView);
 
     void on_settings_triggered();
+
+    void on_pb_getFlight_clicked();
 
 private:
     Ui::MainWindow *ui;

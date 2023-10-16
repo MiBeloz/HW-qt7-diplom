@@ -21,6 +21,9 @@
 #define DEFAULT_NUM_OF_CONN_ATTEMPTS 0
 #define DEFAULT_TIMEOUT 5
 
+#define QUERY_LIST_AIROPORTS "SELECT airport_name->>\'ru\' as \"airportName\", airport_code FROM bookings.airports_data"
+#define QUERY_LIST_IN "SELECT flight_no, scheduled_arrival, ad.airport_name->>\'ru\' as \"Name\" FROM bookings.flights f JOIN bookings.airports_data ad on ad.airport_code = f.departure_airport WHERE f.arrival_airport  = "
+
 #define NUM_DATA_FOR_APP 3
 #define NUM_DATA_FOR_CONNECT_TO_DB 10
 
