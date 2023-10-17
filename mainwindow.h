@@ -27,17 +27,17 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void writeSettings();
-    void readSettings();
-
 private slots:
-    void ReceiveSaveSettings(QVector<QString> appSettings, QVector<QString> dbSettings);
-    void ReceiveSendSettings(QVector<QString> appSettings, QVector<QString> dbSettings);
-    void ReceiveStatusConnection(bool status);
-    void ReceiveTimerTimeout();
-    void ReceiveSendDataFromDB(const QComboBox *pComboBox);
-    void ReceiveSendDataFromDBIn(const QTableView *pTableView);
+    void rec_SaveSettings(QVector<QString> appSettings, QVector<QString> dbSettings);
+    void rec_ReadyReadSettings(QVector<QString> appSettings, QVector<QString> dbSettings);
+    void rec_StatusConnection(bool status);
+    void rec_TimerTimeout();
+    void rec_SendDataFromDB(const QComboBox *pComboBox);
+    void rec_SendDataFromDBIn(const QTableView *pTableView);
+    void rec_SendDataFromDBOut(const QTableView *pTableView);
 
+    void rec_on_pMsg_buttonClicked();
+    void rec_on_stopConnection_buttonClicked();
     void on_settings_triggered();
 
     void on_pb_getFlight_clicked();
@@ -59,6 +59,21 @@ private:
     int connectionAttempts = 0;
     int secondsPassed = 0;
 
+    QString queryAirports = "SELECT airport_name->>\'ru\' as \"airportName\", airport_code "
+                            "FROM bookings.airports_data";
+
+    QString queryArrival = "SELECT flight_no, scheduled_arrival, ad.airport_name->>\'ru\' as \"Name\" "
+                             "FROM bookings.flights f "
+                             "JOIN bookings.airports_data ad on ad.airport_code = f.departure_airport "
+                             "WHERE f.arrival_airport  = ";
+
+    QString queryDeparture = "SELECT flight_no, scheduled_departure, ad.airport_name->>\'ru\' as \"Name\" "
+                           "FROM bookings.flights f "
+                           "JOIN bookings.airports_data ad on ad.airport_code = f.arrival_airport "
+                           "WHERE f.departure_airport  = ";
+
+
+    void setEnabledWidgets(bool);
     void resizeEvent(QResizeEvent *event) override;
     void moveToTopCenter();
 };

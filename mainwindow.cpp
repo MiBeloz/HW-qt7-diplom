@@ -7,10 +7,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    //ui->cbox_listAirports->setVisible(false);
-
     stopConnection = new QPushButton("Отмена", this);
-    stopConnection->setVisible(false);
     lb_statusText.setMinimumSize(250, 22);
     ui->statusbar->addWidget(&lb_statusPixmap);
     ui->statusbar->addWidget(&lb_statusText);
@@ -28,34 +25,17 @@ MainWindow::MainWindow(QWidget *parent)
     pDatabase = new DataBase(this);
     pSettings = new Settings(this);
 
-    QObject::connect(pDatabase, &DataBase::sig_SendStatusConnection, this, &MainWindow::ReceiveStatusConnection);
-    QObject::connect(pSettings, &Settings::sig_sendSettings, this, &MainWindow::ReceiveSendSettings);
+    QObject::connect(pDatabase, &DataBase::sig_SendStatusConnection, this, &MainWindow::rec_StatusConnection);
+    QObject::connect(pSettings, &Settings::sig_ReadyReadSettings, this, &MainWindow::rec_ReadyReadSettings);
     QObject::connect(pFormSettings, &FormSettings::sig_saveSettings, pSettings, &Settings::writeSettingsAll);
-    QObject::connect(pFormSettings, &FormSettings::sig_saveSettings, this, &MainWindow::ReceiveSaveSettings);
-    QObject::connect(pMsg, &QMessageBox::buttonClicked, this, [&]{
-        pTimer->start();
-        ui->settings->setEnabled(false);
-        stopConnection->setVisible(true);
-        if (dataForConnect[numOfConnectionAttempts].toInt() == connectionAttempts + 1){
-            ui->settings->setEnabled(true);
-            stopConnection->setVisible(false);
-            lb_statusText.setText("Отключено");
-        }
-        else{
-            lb_statusText.setText("Отключено\tПереподключение через: " + dataForConnect[timeout]);
-        }});
-    QObject::connect(pTimer, &QTimer::timeout, this, &MainWindow::ReceiveTimerTimeout);
-    QObject::connect(stopConnection, &QPushButton::clicked, this, [&]{
-        pTimer->stop();
-        secondsPassed = 0;
-        connectionAttempts = 0;
-        ui->settings->setEnabled(true);
-        stopConnection->setVisible(false);
-        lb_statusText.setText("Отключено");
-    });
+    QObject::connect(pFormSettings, &FormSettings::sig_saveSettings, this, &MainWindow::rec_SaveSettings);
+    QObject::connect(pMsg, &QMessageBox::buttonClicked, this, &MainWindow::rec_on_pMsg_buttonClicked);
+    QObject::connect(pTimer, &QTimer::timeout, this, &MainWindow::rec_TimerTimeout);
+    QObject::connect(stopConnection, &QPushButton::clicked, this, &MainWindow::rec_on_stopConnection_buttonClicked);
 
-    QObject::connect(pDatabase, &DataBase::sig_SendDataFromDB, this, &MainWindow::ReceiveSendDataFromDB);
-    QObject::connect(pDatabase, &DataBase::sig_SendDataFromDBIn, this, &MainWindow::ReceiveSendDataFromDBIn);
+    QObject::connect(pDatabase, &DataBase::sig_SendDataFromDB, this, &MainWindow::rec_SendDataFromDB);
+    QObject::connect(pDatabase, &DataBase::sig_SendDataFromDBIn, this, &MainWindow::rec_SendDataFromDBIn);
+    QObject::connect(pDatabase, &DataBase::sig_SendDataFromDBOut, this, &MainWindow::rec_SendDataFromDBOut);
 
     pSettings->readSettingsAll(dataForApp, dataForConnect);
     pSettings->writeSettingsAll(dataForApp, dataForConnect);
@@ -68,17 +48,18 @@ MainWindow::~MainWindow()
         dataForApp[formHeight] = QString::number(height());
     }
     pSettings->writeSettingsAll(dataForApp, dataForConnect);
+
     delete ui;
 }
 
-void MainWindow::ReceiveSaveSettings(QVector<QString> appSettings, QVector<QString> dbSettings)
+void MainWindow::rec_SaveSettings(QVector<QString> appSettings, QVector<QString> dbSettings)
 {
     if (dataForApp[formWidth] != appSettings[formWidth] || dataForApp[formHeight] != appSettings[formHeight]){
         setGeometry(0, 0, appSettings[formWidth].toInt(), appSettings[formHeight].toInt());
         moveToTopCenter();
     }
 
-    if(!pDatabase->checkDatabase(dbSettings)){
+    if(pDatabase->isChange(dbSettings)){
         pDatabase->disconnectFromDatabase();
         pFormSettings->close();
         pDatabase->addDatabaseData(dbSettings);
@@ -89,7 +70,7 @@ void MainWindow::ReceiveSaveSettings(QVector<QString> appSettings, QVector<QStri
     dataForConnect = std::move(dbSettings);
 }
 
-void MainWindow::ReceiveSendSettings(QVector<QString> appSettings, QVector<QString> dbSettings)
+void MainWindow::rec_ReadyReadSettings(QVector<QString> appSettings, QVector<QString> dbSettings)
 {
     dataForApp = std::move(appSettings);
     dataForConnect = std::move(dbSettings);
@@ -99,19 +80,16 @@ void MainWindow::ReceiveSendSettings(QVector<QString> appSettings, QVector<QStri
 
     pDatabase->addDatabaseDriver(POSTGRE_DRIVER);
     pDatabase->addDatabaseData(dataForConnect);
+
     if (dataForConnect[autoConnect] == "true"){
         pDatabase->connectToDatabase();
     }
     else{
-        pixmapStatus.load(":/status/disconnect.png");
-        pixmapStatus = pixmapStatus.scaled(32, 32);
-        lb_statusPixmap.setPixmap(pixmapStatus);
-        lb_statusText.setText("Отключено");
-        stopConnection->setVisible(false);
+        rec_StatusConnection(false);
     }
 }
 
-void MainWindow::ReceiveStatusConnection(bool status)
+void MainWindow::rec_StatusConnection(bool status)
 {
     if (status){
         pixmapStatus.load(":/status/connect.png");
@@ -120,26 +98,32 @@ void MainWindow::ReceiveStatusConnection(bool status)
         lb_statusText.setText("Подключено");
         ui->settings->setEnabled(true);
         stopConnection->setVisible(false);
+        setEnabledWidgets(true);
         secondsPassed = 0;
         connectionAttempts = 0;
 
-        pDatabase->requestToDBListAirports(QUERY_LIST_AIROPORTS);
+        pDatabase->requestToDBListAirports(queryAirports);
     }
     else{
         pixmapStatus.load(":/status/disconnect.png");
         pixmapStatus = pixmapStatus.scaled(32, 32);
         lb_statusPixmap.setPixmap(pixmapStatus);
 
-        pDatabase->disconnectFromDatabase();
+        //pDatabase->disconnectFromDatabase();
         lb_statusText.setText("Отключено");
         stopConnection->setVisible(false);
-        pMsg->setIcon(QMessageBox::Critical);
-        pMsg->setText(pDatabase->getLastError().text());
-        pMsg->show();
+        setEnabledWidgets(false);
+
+        QString lastError = pDatabase->getLastError().text();
+        if (lastError != ""){
+            pMsg->setIcon(QMessageBox::Critical);
+            pMsg->setText(pDatabase->getLastError().text());
+            pMsg->show();
+        }
     }
 }
 
-void MainWindow::ReceiveTimerTimeout()
+void MainWindow::rec_TimerTimeout()
 {
     secondsPassed += 1;
 
@@ -168,24 +152,68 @@ void MainWindow::ReceiveTimerTimeout()
     }
 }
 
-void MainWindow::ReceiveSendDataFromDB(const QComboBox *pComboBox)
+void MainWindow::rec_SendDataFromDB(const QComboBox *pComboBox)
 {
     ui->cbox_listAirports->setModel(pComboBox->model());
     //ui->cbox_listAirports->model()->sort(1);
     qDebug() << ui->cbox_listAirports->itemText(0);
     qDebug() << ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(0,1)).toString();
+    //qDebug() << pDatabase->getLastError().text();
+    qDebug() << ui->dateE_date->text();
 }
 
-void MainWindow::ReceiveSendDataFromDBIn(const QTableView *pTableView)
+void MainWindow::rec_SendDataFromDBIn(const QTableView *pTableView)
+{
+
+
+
+
+
+    ui->tv_flights->setModel(pTableView->model());
+}
+
+void MainWindow::rec_SendDataFromDBOut(const QTableView *pTableView)
 {
     ui->tv_flights->setModel(pTableView->model());
 }
 
+void MainWindow::rec_on_pMsg_buttonClicked()
+{
+    pTimer->start();
+    ui->settings->setEnabled(false);
+    stopConnection->setVisible(true);
+    if (dataForConnect[numOfConnectionAttempts].toInt() == connectionAttempts + 1){
+        ui->settings->setEnabled(true);
+        stopConnection->setVisible(false);
+        lb_statusText.setText("Отключено");
+    }
+    else{
+        lb_statusText.setText("Отключено\tПереподключение через: " + dataForConnect[timeout]);
+    }
+}
+
+void MainWindow::rec_on_stopConnection_buttonClicked()
+{
+    pTimer->stop();
+    secondsPassed = 0;
+    connectionAttempts = 0;
+    ui->settings->setEnabled(true);
+    stopConnection->setVisible(false);
+    lb_statusText.setText("Отключено");
+}
+
 void MainWindow::on_settings_triggered()
 {
-    pFormSettings->ReceiveSendSettings(dataForApp, dataForConnect);
+    pFormSettings->rec_SendSettings(dataForApp, dataForConnect);
     pFormSettings->setModal(true);
     pFormSettings->show();
+}
+
+void MainWindow::setEnabledWidgets(bool enabled)
+{
+    ui->grB_flights->setEnabled(enabled);
+    ui->grB_selectZone->setEnabled(enabled);
+    ui->grB_buttons->setEnabled(enabled);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -210,5 +238,10 @@ void MainWindow::moveToTopCenter()
 
 void MainWindow::on_pb_getFlight_clicked()
 {
-    pDatabase->requestToDBListIn(QUERY_LIST_IN);
+    if (ui->rb_in->isChecked()){
+        pDatabase->requestToDBListIn(queryArrival, ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());
+    }
+    if (ui->rb_out->isChecked()){
+        pDatabase->requestToDBListOut(queryDeparture, ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());
+    }
 }

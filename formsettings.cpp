@@ -8,16 +8,20 @@ FormSettings::FormSettings(QWidget *parent) :
     ui->setupUi(this);
 
     QObject::connect(ui->chB_saveMainWindowSize, &QCheckBox::clicked, this, [&](bool checked){
-        if (checked)
+        if (checked){
             ui->grB_mainWindowSize->setEnabled(false);
-        else
+        }
+        else{
             ui->grB_mainWindowSize->setEnabled(true);
+        }
     });
     QObject::connect(ui->chB_showPass, &QCheckBox::clicked, this, [&](bool checked){
-        if (checked)
+        if (checked){
             ui->le_pass->setEchoMode(QLineEdit::Normal);
-        else
+        }
+        else{
             ui->le_pass->setEchoMode(QLineEdit::Password);
+        }
     });
     QObject::connect(ui->chB_autoConnect, &QCheckBox::clicked, this, [&](bool checked){
         if (checked){
@@ -33,40 +37,24 @@ FormSettings::FormSettings(QWidget *parent) :
             ui->spB_timeout->setEnabled(false);
         }
     });
-
-
     QObject::connect(ui->chB_saveMainWindowSize, &QCheckBox::stateChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-
-//    QObject::connect(ui->spB_mainWindowWidth, &QSpinBox::valueChanged, this, [&]{
-//        ui->pb_save->setEnabled(true);
-//    });
     QObject::connect(ui->spB_mainWindowWidth, &QSpinBox::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-
-//    QObject::connect(ui->spB_mainWindowHeight, &QSpinBox::valueChanged, this, [&]{
-//        ui->pb_save->setEnabled(true);
-//    });
     QObject::connect(ui->spB_mainWindowHeight, &QSpinBox::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-
     QObject::connect(ui->le_hostname, &QLineEdit::textEdited, this, [&]{
         ui->pb_save->setEnabled(true);
     });
     QObject::connect(ui->le_dbName, &QLineEdit::textEdited, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-
-//    QObject::connect(ui->spB_port, &QSpinBox::valueChanged, this, [&]{
-//        ui->pb_save->setEnabled(true);
-//    });
     QObject::connect(ui->spB_port, &QSpinBox::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-
     QObject::connect(ui->le_login, &QLineEdit::textEdited, this, [&]{
         ui->pb_save->setEnabled(true);
     });
@@ -82,13 +70,6 @@ FormSettings::FormSettings(QWidget *parent) :
     QObject::connect(ui->chB_autoConnect, &QCheckBox::stateChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-
-//    QObject::connect(ui->spB_numOfConnectionAttempts, &QSpinBox::valueChanged, this, [&]{
-//        ui->pb_save->setEnabled(true);
-//    });
-//    QObject::connect(ui->spB_timeout, &QSpinBox::valueChanged, this, [&]{
-//        ui->pb_save->setEnabled(true);
-//    });
     QObject::connect(ui->spB_numOfConnectionAttempts, &QSpinBox::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
@@ -102,7 +83,7 @@ FormSettings::~FormSettings()
     delete ui;
 }
 
-void FormSettings::ReceiveSendSettings(QVector<QString> appSettings, QVector<QString> dbSettings)
+void FormSettings::rec_SendSettings(QVector<QString> appSettings, QVector<QString> dbSettings)
 {
     if (appSettings[saveFormSize] == "true"){
         ui->chB_saveMainWindowSize->setChecked(true);
@@ -131,15 +112,19 @@ void FormSettings::ReceiveSendSettings(QVector<QString> appSettings, QVector<QSt
         ui->le_pass->setEchoMode(QLineEdit::Password);
     }
 
-    if (dbSettings[savePass] == "true")
+    if (dbSettings[savePass] == "true"){
         ui->chB_savePass->setChecked(true);
-    else
+    }
+    else{
         ui->chB_savePass->setChecked(false);
+    }
 
-    if (dbSettings[autoConnect] == "true")
+    if (dbSettings[autoConnect] == "true"){
         ui->chB_autoConnect->setChecked(true);
-    else
+    }
+    else{
         ui->chB_autoConnect->setChecked(false);
+    }
 
     if (ui->chB_autoConnect->isChecked()){
         ui->lb_numOfConnectionAttempts->setEnabled(true);
@@ -165,10 +150,12 @@ void FormSettings::on_pb_save_clicked()
     QVector<QString> appSettings(NUM_DATA_FOR_APP);
     QVector<QString> dbSettings(NUM_DATA_FOR_CONNECT_TO_DB);
 
-    if (ui->chB_saveMainWindowSize->isChecked())
+    if (ui->chB_saveMainWindowSize->isChecked()){
         appSettings[saveFormSize] = "true";
-    else
+    }
+    else{
         appSettings[saveFormSize] = "false";
+    }
 
     appSettings[formWidth] = ui->spB_mainWindowWidth->text();
     appSettings[formHeight] = ui->spB_mainWindowHeight->text();
@@ -179,27 +166,33 @@ void FormSettings::on_pb_save_clicked()
     dbSettings[login] = ui->le_login->text();
     dbSettings[pass] = ui->le_pass->text();
 
-    if (ui->chB_showPass->isChecked())
+    if (ui->chB_showPass->isChecked()){
         dbSettings[showPass] = "true";
-    else
+    }
+    else{
         dbSettings[showPass] = "false";
+    }
 
-    if (ui->chB_savePass->isChecked())
+    if (ui->chB_savePass->isChecked()){
         dbSettings[savePass] = "true";
-    else
+    }
+    else{
         dbSettings[savePass] = "false";
+    }
 
-    if (ui->chB_autoConnect->isChecked())
+    if (ui->chB_autoConnect->isChecked()){
         dbSettings[autoConnect] = "true";
-    else
+    }
+    else{
         dbSettings[autoConnect] = "false";
+    }
 
     dbSettings[numOfConnectionAttempts] = ui->spB_numOfConnectionAttempts->text();
     dbSettings[timeout] = ui->spB_timeout->text();
 
-    emit sig_saveSettings(appSettings, dbSettings);
-
     ui->pb_save->setEnabled(false);
+
+    emit sig_saveSettings(appSettings, dbSettings);
 }
 
 
@@ -221,10 +214,14 @@ void FormSettings::on_pb_default_clicked()
     ui->le_pass->setText(DEFAULT_PASS);
     ui->chB_showPass->setChecked(DEFAULT_SHOW_PASS);
     ui->chB_savePass->setChecked(DEFAULT_SAVE_PASS);
-    if (ui->chB_showPass->isChecked())
+
+    if (ui->chB_showPass->isChecked()){
         ui->le_pass->setEchoMode(QLineEdit::Normal);
-    else
+    }
+    else{
         ui->le_pass->setEchoMode(QLineEdit::Password);
+    }
+
     ui->chB_autoConnect->setChecked(DEFAULT_AUTOCONNECT);
     ui->spB_numOfConnectionAttempts->setValue(DEFAULT_NUM_OF_CONN_ATTEMPTS);
     ui->spB_timeout->setValue(DEFAULT_TIMEOUT);

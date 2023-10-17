@@ -21,13 +21,11 @@ signals:
     void sig_saveSettings(QVector<QString> appSettings, QVector<QString> dbSettings);
 
 public slots:
-    void ReceiveSendSettings(QVector<QString> appSettings, QVector<QString> dbSettings);
+    void rec_SendSettings(QVector<QString> appSettings, QVector<QString> dbSettings);
 
 private slots:
     void on_pb_save_clicked();
-
     void on_pb_cancel_clicked();
-
     void on_pb_default_clicked();
 
 private:

@@ -55,6 +55,9 @@
            <property name="text">
             <string>Прилет</string>
            </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
           </widget>
          </item>
          <item>
@@ -63,7 +66,7 @@
             <string>Вылет</string>
            </property>
            <property name="checked">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -91,6 +94,9 @@
            </property>
            <property name="currentSection">
             <enum>QDateTimeEdit::DaySection</enum>
+           </property>
+           <property name="displayFormat">
+            <string>dd.MM.yyyy</string>
            </property>
            <property name="calendarPopup">
             <bool>true</bool>

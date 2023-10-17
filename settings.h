@@ -13,7 +13,7 @@ public:
     explicit Settings(QObject *parent = nullptr);
 
 signals:
-     void sig_sendSettings(QVector<QString> appSettings, QVector<QString> dbSettings);
+     void sig_ReadyReadSettings(QVector<QString> appSettings, QVector<QString> dbSettings);
 
 public slots:
     void writeSettingsApp(QVector<QString> appSettings);
