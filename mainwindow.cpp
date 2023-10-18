@@ -33,6 +33,11 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(pTimer, &QTimer::timeout, this, &MainWindow::rec_TimerTimeout);
     QObject::connect(stopConnection, &QPushButton::clicked, this, &MainWindow::rec_on_stopConnection_buttonClicked);
 
+    QObject::connect(ui->cbox_listAirports, &QComboBox::currentTextChanged, this, [&]{ui->pb_getFlights->setEnabled(true);});
+    QObject::connect(ui->rb_arrival, &QRadioButton::toggled, this, [&]{ui->pb_getFlights->setEnabled(true);});
+    QObject::connect(ui->rb_departure, &QRadioButton::toggled, this, [&]{ui->pb_getFlights->setEnabled(true);});
+    QObject::connect(ui->de_departureDate, &QDateEdit::dateChanged, this, [&]{ui->pb_getFlights->setEnabled(true);});
+
     QObject::connect(pDatabase, &DataBase::sig_SendDataAirportsFromDB, this, &MainWindow::rec_sendDataAirportsFromDB);
     QObject::connect(pDatabase, &DataBase::sig_SendDataFlightsFromDB, this, &MainWindow::rec_sendDataFlightsFromDB);
 
@@ -95,9 +100,13 @@ void MainWindow::rec_StatusConnection(bool status)
         pixmapStatus = pixmapStatus.scaled(32, 32);
         lb_statusPixmap.setPixmap(pixmapStatus);
         lb_statusText.setText("Подключено");
-        ui->settings->setEnabled(true);
+        ui->menubar_settings->setEnabled(true);
         stopConnection->setVisible(false);
         setEnabledWidgets(true);
+        on_pb_clear_tv_flights_clicked();
+        ui->menubar_connect->setEnabled(false);
+        ui->menubar_disconnect->setEnabled(true);
+        ui->pb_getFlights->setEnabled(true);
         secondsPassed = 0;
         connectionAttempts = 0;
 
@@ -107,11 +116,11 @@ void MainWindow::rec_StatusConnection(bool status)
         pixmapStatus.load(":/status/disconnect.png");
         pixmapStatus = pixmapStatus.scaled(32, 32);
         lb_statusPixmap.setPixmap(pixmapStatus);
-
-        //pDatabase->disconnectFromDatabase();
         lb_statusText.setText("Отключено");
         stopConnection->setVisible(false);
         setEnabledWidgets(false);
+        ui->menubar_connect->setEnabled(true);
+        ui->menubar_disconnect->setEnabled(false);
 
         QString lastError = pDatabase->getLastError().text();
         if (lastError != ""){
@@ -154,6 +163,7 @@ void MainWindow::rec_TimerTimeout()
 void MainWindow::rec_sendDataAirportsFromDB(const QComboBox *pComboBox)
 {
     ui->cbox_listAirports->setModel(pComboBox->model());
+    ui->cbox_listAirports->setCurrentIndex(0);
 }
 
 void MainWindow::rec_sendDataFlightsFromDB(const QTableView *pTableView)
@@ -163,15 +173,17 @@ void MainWindow::rec_sendDataFlightsFromDB(const QTableView *pTableView)
     ui->tv_flights->resizeColumnToContents(0);
     ui->tv_flights->resizeColumnToContents(1);
     ui->tv_flights->resizeColumnToContents(2);
+
+    ui->pb_clear_tv_flights->setEnabled(true);
 }
 
 void MainWindow::rec_on_pMsg_buttonClicked()
 {
     pTimer->start();
-    ui->settings->setEnabled(false);
+    ui->menubar_settings->setEnabled(false);
     stopConnection->setVisible(true);
     if (dataForConnect[numOfConnectionAttempts].toInt() == connectionAttempts + 1){
-        ui->settings->setEnabled(true);
+        ui->menubar_settings->setEnabled(true);
         stopConnection->setVisible(false);
         lb_statusText.setText("Отключено");
     }
@@ -185,12 +197,12 @@ void MainWindow::rec_on_stopConnection_buttonClicked()
     pTimer->stop();
     secondsPassed = 0;
     connectionAttempts = 0;
-    ui->settings->setEnabled(true);
+    ui->menubar_settings->setEnabled(true);
     stopConnection->setVisible(false);
     lb_statusText.setText("Отключено");
 }
 
-void MainWindow::on_settings_triggered()
+void MainWindow::on_menubar_settings_triggered()
 {
     pFormSettings->rec_SendSettings(dataForApp, dataForConnect);
     pFormSettings->setModal(true);
@@ -201,7 +213,7 @@ void MainWindow::setEnabledWidgets(bool enabled)
 {
     ui->grB_flights->setEnabled(enabled);
     ui->grB_selectZone->setEnabled(enabled);
-    ui->grB_buttons->setEnabled(enabled);
+    ui->grB_actions->setEnabled(enabled);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -224,25 +236,50 @@ void MainWindow::moveToTopCenter()
     move(center);    //перемещаем
 }
 
-void MainWindow::on_pb_getFlight_clicked()
+void MainWindow::on_pb_getFlights_clicked()
 {
-    QString requestDate = ui->dateE_date->text().mid(6) + '-' + ui->dateE_date->text().mid(3, 2) + '-' + ui->dateE_date->text().mid(0, 2);
+    QString requestDate = ui->de_departureDate->text().mid(6) + '-' + ui->de_departureDate->text().mid(3, 2) + '-' + ui->de_departureDate->text().mid(0, 2);
 
     qDebug() << "on_pb_getFlight_clicked-------------------------";
     qDebug() << "airport = " + ui->cbox_listAirports->itemText(ui->cbox_listAirports->currentIndex());
     qDebug() << "airportCode = " + ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString();
-    qDebug() << "date = " + ui->dateE_date->text();
+    qDebug() << "date = " + ui->de_departureDate->text();
     qDebug() << "requestDate = " + requestDate;
     qDebug() << "------------------------------------------------";
 
-    if (ui->rb_in->isChecked()){
+    if (ui->rb_arrival->isChecked()){
         pDatabase->requestListFlightsToDB(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString(),
                                           requestDate,
                                           arrival);
+
+        ui->pb_getFlights->setEnabled(false);
     }
-    if (ui->rb_out->isChecked()){
+    if (ui->rb_departure->isChecked()){
         pDatabase->requestListFlightsToDB(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString(),
                                           requestDate,
                                           departure);
+
+        ui->pb_getFlights->setEnabled(false);
     }
+}
+
+void MainWindow::on_menubar_connect_triggered()
+{
+    pTimer->stop();
+    secondsPassed = 0;
+    connectionAttempts = 0;
+    pDatabase->connectToDatabase();
+}
+
+void MainWindow::on_menubar_disconnect_triggered()
+{
+    pDatabase->disconnectFromDatabase();
+    rec_StatusConnection(false);
+}
+
+void MainWindow::on_pb_clear_tv_flights_clicked()
+{
+    ui->tv_flights->setModel(nullptr);
+    ui->pb_clear_tv_flights->setEnabled(false);
+    ui->pb_getFlights->setEnabled(true);
 }

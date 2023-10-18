@@ -46,6 +46,15 @@ FormSettings::FormSettings(QWidget *parent) :
     QObject::connect(ui->spB_mainWindowHeight, &QSpinBox::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
+    QObject::connect(ui->chB_saveAirport, &QCheckBox::stateChanged, this, [&]{
+        ui->pb_save->setEnabled(true);
+    });
+    QObject::connect(ui->chB_saveRoute, &QCheckBox::stateChanged, this, [&]{
+        ui->pb_save->setEnabled(true);
+    });
+    QObject::connect(ui->chB_saveDate, &QCheckBox::stateChanged, this, [&]{
+        ui->pb_save->setEnabled(true);
+    });
     QObject::connect(ui->le_hostname, &QLineEdit::textEdited, this, [&]{
         ui->pb_save->setEnabled(true);
     });
@@ -96,6 +105,27 @@ void FormSettings::rec_SendSettings(QVector<QString> appSettings, QVector<QStrin
 
     ui->spB_mainWindowWidth->setValue(appSettings[formWidth].toInt());
     ui->spB_mainWindowHeight->setValue(appSettings[formHeight].toInt());
+
+    if (appSettings[saveAirport] == "true"){
+        ui->chB_saveAirport->setChecked(true);
+    }
+    else{
+        ui->chB_saveAirport->setChecked(false);
+    }
+
+    if (appSettings[saveRoute] == "true"){
+        ui->chB_saveRoute->setChecked(true);
+    }
+    else{
+        ui->chB_saveRoute->setChecked(false);
+    }
+
+    if (appSettings[saveDate] == "true"){
+        ui->chB_saveDate->setChecked(true);
+    }
+    else{
+        ui->chB_saveDate->setChecked(false);
+    }
 
     ui->le_hostname->setText(dbSettings[hostName]);
     ui->le_dbName->setText(dbSettings[dbName]);
@@ -160,6 +190,27 @@ void FormSettings::on_pb_save_clicked()
     appSettings[formWidth] = ui->spB_mainWindowWidth->text();
     appSettings[formHeight] = ui->spB_mainWindowHeight->text();
 
+    if (ui->chB_saveAirport->isChecked()){
+        appSettings[saveAirport] = "true";
+    }
+    else{
+        appSettings[saveAirport] = "false";
+    }
+
+    if (ui->chB_saveRoute->isChecked()){
+        appSettings[saveRoute] = "true";
+    }
+    else{
+        appSettings[saveRoute] = "false";
+    }
+
+    if (ui->chB_saveDate->isChecked()){
+        appSettings[saveDate] = "true";
+    }
+    else{
+        appSettings[saveDate] = "false";
+    }
+
     dbSettings[hostName] = ui->le_hostname->text();
     dbSettings[dbName] = ui->le_dbName->text();
     dbSettings[port] = ui->spB_port->text();
@@ -207,6 +258,9 @@ void FormSettings::on_pb_default_clicked()
     ui->chB_saveMainWindowSize->setChecked(DEFAULT_SAVE_FORM_SIZE);
     ui->spB_mainWindowWidth->setValue(DEFAULT_FORM_WIDTH);
     ui->spB_mainWindowHeight->setValue(DEFAULT_FORM_HEIGHT);
+    ui->chB_saveAirport->setChecked(DEFAULT_SAVE_AIRPORT);
+    ui->chB_saveRoute->setChecked(DEFAULT_SAVE_ROUTE);
+    ui->chB_saveDate->setChecked(DEFAULT_SAVE_DATE);
     ui->le_hostname->setText(DEFAULT_HOSTNAME);
     ui->le_dbName->setText(DEFAULT_DBNAME);
     ui->spB_port->setValue(DEFAULT_PORT);

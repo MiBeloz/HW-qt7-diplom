@@ -9,6 +9,9 @@
 #define DEFAULT_SAVE_FORM_SIZE true
 #define DEFAULT_FORM_WIDTH 800
 #define DEFAULT_FORM_HEIGHT 600
+#define DEFAULT_SAVE_AIRPORT true
+#define DEFAULT_SAVE_ROUTE true
+#define DEFAULT_SAVE_DATE true
 
 #define DEFAULT_HOSTNAME "981757-ca08998.tmweb.ru"
 #define DEFAULT_DBNAME "demo"
@@ -21,13 +24,16 @@
 #define DEFAULT_NUM_OF_CONN_ATTEMPTS 0
 #define DEFAULT_TIMEOUT 5
 
-#define NUM_DATA_FOR_APP 3
+#define NUM_DATA_FOR_APP 6
 #define NUM_DATA_FOR_CONNECT_TO_DB 10
 
 enum fieldsAppSettings{
     saveFormSize = 0,
     formWidth = 1,
-    formHeight = 2
+    formHeight = 2,
+    saveAirport = 3,
+    saveRoute = 4,
+    saveDate = 5
 };
 
 enum fieldsForConnect{

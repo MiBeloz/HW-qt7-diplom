@@ -37,9 +37,15 @@ private slots:
 
     void rec_on_pMsg_buttonClicked();
     void rec_on_stopConnection_buttonClicked();
-    void on_settings_triggered();
+    void on_menubar_settings_triggered();
 
-    void on_pb_getFlight_clicked();
+    void on_pb_getFlights_clicked();
+
+    void on_menubar_connect_triggered();
+
+    void on_menubar_disconnect_triggered();
+
+    void on_pb_clear_tv_flights_clicked();
 
 private:
     Ui::MainWindow *ui;

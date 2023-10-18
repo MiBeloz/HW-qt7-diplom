@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>572</width>
-    <height>390</height>
+    <width>721</width>
+    <height>513</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -48,74 +48,108 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
-          <widget class="QComboBox" name="cbox_listAirports"/>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="rb_in">
-           <property name="text">
-            <string>Прилет</string>
+          <widget class="QGroupBox" name="grB_airport">
+           <property name="title">
+            <string>Аэропорт</string>
            </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QComboBox" name="cbox_listAirports"/>
+            </item>
+           </layout>
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="rb_out">
-           <property name="text">
-            <string>Вылет</string>
+          <widget class="QGroupBox" name="grB_route">
+           <property name="title">
+            <string>Направление</string>
            </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <widget class="QRadioButton" name="rb_arrival">
+              <property name="text">
+               <string>Прилет</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rb_departure">
+              <property name="text">
+               <string>Вылет</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
          <item>
-          <widget class="QDateEdit" name="dateE_date">
-           <property name="maximumDateTime">
-            <datetime>
-             <hour>23</hour>
-             <minute>59</minute>
-             <second>59</second>
-             <year>2017</year>
-             <month>9</month>
-             <day>14</day>
-            </datetime>
+          <widget class="QGroupBox" name="grB_departureDate">
+           <property name="title">
+            <string>Дата вылета</string>
            </property>
-           <property name="minimumDateTime">
-            <datetime>
-             <hour>0</hour>
-             <minute>0</minute>
-             <second>0</second>
-             <year>2016</year>
-             <month>8</month>
-             <day>15</day>
-            </datetime>
-           </property>
-           <property name="currentSection">
-            <enum>QDateTimeEdit::DaySection</enum>
-           </property>
-           <property name="displayFormat">
-            <string>dd.MM.yyyy</string>
-           </property>
-           <property name="calendarPopup">
-            <bool>true</bool>
-           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item>
+             <widget class="QDateEdit" name="de_departureDate">
+              <property name="maximumDateTime">
+               <datetime>
+                <hour>23</hour>
+                <minute>59</minute>
+                <second>59</second>
+                <year>2017</year>
+                <month>9</month>
+                <day>14</day>
+               </datetime>
+              </property>
+              <property name="minimumDateTime">
+               <datetime>
+                <hour>0</hour>
+                <minute>0</minute>
+                <second>0</second>
+                <year>2016</year>
+                <month>8</month>
+                <day>15</day>
+               </datetime>
+              </property>
+              <property name="currentSection">
+               <enum>QDateTimeEdit::DaySection</enum>
+              </property>
+              <property name="displayFormat">
+               <string>dd.MM.yyyy</string>
+              </property>
+              <property name="calendarPopup">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
         </layout>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QGroupBox" name="grB_buttons">
+       <widget class="QGroupBox" name="grB_actions">
         <property name="title">
-         <string>Управление</string>
+         <string>Действия</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <widget class="QPushButton" name="pb_getFlight">
+          <widget class="QPushButton" name="pb_getFlights">
            <property name="text">
             <string>Получить список рейсов</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pb_clear_tv_flights">
+           <property name="text">
+            <string>Очистить поле расписания рейсов</string>
            </property>
           </widget>
          </item>
@@ -132,7 +166,7 @@
       <item row="0" column="0" rowspan="2">
        <widget class="QGroupBox" name="grB_flights">
         <property name="title">
-         <string>GroupBox</string>
+         <string>Расписание рейсов</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
@@ -150,37 +184,90 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>572</width>
+     <width>721</width>
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="file">
+   <widget class="QMenu" name="menubar_file">
     <property name="title">
      <string>Файл</string>
     </property>
-    <addaction name="settings"/>
+    <addaction name="menubar_connect"/>
+    <addaction name="menubar_disconnect"/>
+    <addaction name="separator"/>
+    <addaction name="menubar_settings"/>
+    <addaction name="separator"/>
+    <addaction name="menubar_exit"/>
    </widget>
-   <widget class="QMenu" name="help">
+   <widget class="QMenu" name="menubar_help">
     <property name="title">
      <string>Справка</string>
     </property>
-    <addaction name="about"/>
+    <addaction name="menubar_about"/>
    </widget>
-   <addaction name="file"/>
-   <addaction name="help"/>
+   <addaction name="menubar_file"/>
+   <addaction name="menubar_help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="settings">
+  <action name="menubar_settings">
    <property name="text">
     <string>Настройки</string>
    </property>
   </action>
-  <action name="about">
+  <action name="menubar_about">
    <property name="text">
     <string>О программе</string>
    </property>
   </action>
+  <action name="menubar_connect">
+   <property name="text">
+    <string>Подключиться</string>
+   </property>
+  </action>
+  <action name="menubar_disconnect">
+   <property name="text">
+    <string>Отключиться</string>
+   </property>
+  </action>
+  <action name="menubar_exit">
+   <property name="text">
+    <string>Выход</string>
+   </property>
+  </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>pb_exit</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>469</x>
+     <y>322</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>285</x>
+     <y>194</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>menubar_exit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>285</x>
+     <y>194</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

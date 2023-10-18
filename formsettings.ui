@@ -73,29 +73,11 @@
      <property name="movable">
       <bool>false</bool>
      </property>
-     <widget class="QWidget" name="tabApp">
+     <widget class="QWidget" name="tab_app">
       <attribute name="title">
        <string>Настройки приложения</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="2" column="0">
-        <widget class="QGroupBox" name="groupBox">
-         <property name="title">
-          <string>GroupBox</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_6"/>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QCheckBox" name="chB_saveMainWindowSize">
-         <property name="text">
-          <string>Восстанавливать размер главного окна из прошлого запуска программы</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="0">
         <widget class="QGroupBox" name="grB_mainWindowSize">
          <property name="title">
@@ -157,9 +139,56 @@
          </layout>
         </widget>
        </item>
+       <item row="2" column="0">
+        <widget class="QGroupBox" name="grB_userSettings">
+         <property name="title">
+          <string>Пользовательские настройки</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QCheckBox" name="chB_saveAirport">
+            <property name="text">
+             <string>Восстанавливать выбранный аэропорт после перезапуска программы</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chB_saveRoute">
+            <property name="text">
+             <string>Восстанавливать выбранное направление после перезапуска программы</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chB_saveDate">
+            <property name="text">
+             <string>Восстанавливать поле даты после перезапуска программы</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="chB_saveMainWindowSize">
+         <property name="text">
+          <string>Восстанавливать размер главного окна из прошлого запуска программы</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QGroupBox" name="grB_graphics">
+         <property name="title">
+          <string>Графики</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabDatabase">
+     <widget class="QWidget" name="tab_database">
       <attribute name="title">
        <string>Настройки подключения</string>
       </attribute>

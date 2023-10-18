@@ -4,19 +4,16 @@ DataBase::DataBase(QObject *parent)
     : QObject{parent}
 {
     pDatabase = new QSqlDatabase();
-    pQueryModelTable = nullptr;
-    pQueryModelAirports = nullptr;
-    pTableView = nullptr;
-    pComboBox = nullptr;
+    pQueryModelTable = new QSqlQueryModel(this);
+    pQueryModelAirports = new QSqlQueryModel(this);
+    pTableView = new QTableView(nullptr);
+    pComboBox = new QComboBox(nullptr);
 }
 
 DataBase::~DataBase()
 {
-    delete pQueryModelTable;
-    delete pQueryModelAirports;
     delete pTableView;
     delete pComboBox;
-
     delete pDatabase;
 }
 
@@ -36,31 +33,11 @@ void DataBase::addDatabaseData(QVector<QString> dataForConnect)
 
 void DataBase::connectToDatabase()
 {
-    bool status = pDatabase->open();
-
-    if (status){
-        pQueryModelTable = new QSqlQueryModel(nullptr);
-        pQueryModelAirports = new QSqlQueryModel(nullptr);
-        pTableView = new QTableView(nullptr);
-        pComboBox = new QComboBox(nullptr);
-    }
-    else{///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        pQueryModelTable = nullptr;
-        pQueryModelAirports = nullptr;
-        pTableView = nullptr;
-        pComboBox = nullptr;
-    }
-
-    emit sig_SendStatusConnection(status);
+    emit sig_SendStatusConnection(pDatabase->open());
 }
 
 void DataBase::disconnectFromDatabase()
 {
-    delete pQueryModelTable;
-    delete pQueryModelAirports;
-    delete pTableView;
-    delete pComboBox;
-
     pDatabase->close();
 }
 
