@@ -108,12 +108,12 @@
               </property>
               <property name="minimumDateTime">
                <datetime>
-                <hour>0</hour>
+                <hour>18</hour>
                 <minute>0</minute>
                 <second>0</second>
                 <year>2016</year>
                 <month>8</month>
-                <day>15</day>
+                <day>14</day>
                </datetime>
               </property>
               <property name="currentSection">
@@ -185,7 +185,7 @@
      <x>0</x>
      <y>0</y>
      <width>721</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menubar_file">

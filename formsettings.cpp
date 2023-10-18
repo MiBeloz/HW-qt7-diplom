@@ -106,21 +106,21 @@ void FormSettings::rec_SendSettings(QVector<QString> appSettings, QVector<QStrin
     ui->spB_mainWindowWidth->setValue(appSettings[formWidth].toInt());
     ui->spB_mainWindowHeight->setValue(appSettings[formHeight].toInt());
 
-    if (appSettings[saveAirport] == "true"){
+    if (appSettings[restoreAirport] != ""){
         ui->chB_saveAirport->setChecked(true);
     }
     else{
         ui->chB_saveAirport->setChecked(false);
     }
 
-    if (appSettings[saveRoute] == "true"){
+    if (appSettings[restoreRoute] != ""){
         ui->chB_saveRoute->setChecked(true);
     }
     else{
         ui->chB_saveRoute->setChecked(false);
     }
 
-    if (appSettings[saveDate] == "true"){
+    if (appSettings[restoreDate] != ""){
         ui->chB_saveDate->setChecked(true);
     }
     else{
@@ -191,24 +191,24 @@ void FormSettings::on_pb_save_clicked()
     appSettings[formHeight] = ui->spB_mainWindowHeight->text();
 
     if (ui->chB_saveAirport->isChecked()){
-        appSettings[saveAirport] = "true";
+        appSettings[restoreAirport] = "true";
     }
     else{
-        appSettings[saveAirport] = "false";
+        appSettings[restoreAirport] = "false";
     }
 
     if (ui->chB_saveRoute->isChecked()){
-        appSettings[saveRoute] = "true";
+        appSettings[restoreRoute] = "true";
     }
     else{
-        appSettings[saveRoute] = "false";
+        appSettings[restoreRoute] = "false";
     }
 
     if (ui->chB_saveDate->isChecked()){
-        appSettings[saveDate] = "true";
+        appSettings[restoreDate] = "true";
     }
     else{
-        appSettings[saveDate] = "false";
+        appSettings[restoreDate] = "false";
     }
 
     dbSettings[hostName] = ui->le_hostname->text();
@@ -258,9 +258,9 @@ void FormSettings::on_pb_default_clicked()
     ui->chB_saveMainWindowSize->setChecked(DEFAULT_SAVE_FORM_SIZE);
     ui->spB_mainWindowWidth->setValue(DEFAULT_FORM_WIDTH);
     ui->spB_mainWindowHeight->setValue(DEFAULT_FORM_HEIGHT);
-    ui->chB_saveAirport->setChecked(DEFAULT_SAVE_AIRPORT);
-    ui->chB_saveRoute->setChecked(DEFAULT_SAVE_ROUTE);
-    ui->chB_saveDate->setChecked(DEFAULT_SAVE_DATE);
+    ui->chB_saveAirport->setChecked(DEFAULT_RESTORE_AIRPORT);
+    ui->chB_saveRoute->setChecked(DEFAULT_RESTORE_ROUTE);
+    ui->chB_saveDate->setChecked(DEFAULT_RESTORE_DATE);
     ui->le_hostname->setText(DEFAULT_HOSTNAME);
     ui->le_dbName->setText(DEFAULT_DBNAME);
     ui->spB_port->setValue(DEFAULT_PORT);
