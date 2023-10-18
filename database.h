@@ -23,16 +23,14 @@ public:
     void addDatabaseData(QVector<QString> dataForConnect);
     void connectToDatabase();
     void disconnectFromDatabase();
-    void requestToDBListAirports(QString request);
-    void requestToDBListIn(QString request, QString arrivalAirport);
-    void requestToDBListOut(QString request, QString arrivalAirport);
+    void requestListAirportsToDB();
+    void requestListFlightsToDB(QString airportCode, QString requestDate, requestType type);
     QSqlError getLastError(void);
     bool isChange(QVector<QString> dataForConnect);
 
 signals:
-   void sig_SendDataFromDB(const QComboBox *pComboBox);
-   void sig_SendDataFromDBIn(const QTableView *pTableView);
-   void sig_SendDataFromDBOut(const QTableView *pTableView);
+   void sig_SendDataAirportsFromDB(const QComboBox *pComboBox);
+   void sig_SendDataFlightsFromDB(const QTableView *pTableView);
    void sig_SendStatusConnection(bool);
 
 private:

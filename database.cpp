@@ -64,60 +64,49 @@ void DataBase::disconnectFromDatabase()
     pDatabase->close();
 }
 
-void DataBase::requestToDBListAirports(QString request)
+void DataBase::requestListAirportsToDB()
 {
-    pQueryModelAirports->setQuery(request, *pDatabase);
+    pQueryModelAirports->setQuery("SELECT airport_name->>\'ru\' as \"airportName\", airport_code "
+                                  "FROM bookings.airports_data",
+                                  *pDatabase);
 
-    //pQueryModel->sort(0);
     pComboBox->setModel(pQueryModelAirports);
 
-    emit sig_SendDataFromDB(pComboBox);
+    emit sig_SendDataAirportsFromDB(pComboBox);
 }
 
-void DataBase::requestToDBListIn(QString request, QString arrivalAirport)
+void DataBase::requestListFlightsToDB(QString airportCode, QString requestDate, requestType type)
 {
-    pQueryModelTable->setQuery("SELECT flight_no, scheduled_arrival, ad.airport_name->>\'ru\' as \"Name\" "
-                                "FROM bookings.flights f "
-                                "JOIN bookings.airports_data ad on ad.airport_code = f.departure_airport "
-                                "WHERE f.arrival_airport  = \'YKS\'"
-                                " and scheduled_arrival::date = date(\'2016-12-18\')",
-                                //date(\'2016-12-18\')",
-                                *pDatabase);
-
-    //pQueryModelTable->setQuery(request + "\'" + arrivalAirport + "\' and ad.airport_date = date(\'2016-12-18\')", *pDatabase);
-    //pQueryModelTable->setQuery(request + "\'" + arrivalAirport + "\'", *pDatabase);
+    if (type == arrival){
+        pQueryModelTable->setQuery("SELECT flight_no, scheduled_arrival, ad.airport_name->>\'ru\' as \"Name\" "
+                                   "FROM bookings.flights f "
+                                   "JOIN bookings.airports_data ad on ad.airport_code = f.departure_airport "
+                                   "WHERE f.arrival_airport  = \'" + airportCode + "\' "
+                                   "AND scheduled_departure::date = date(\'" + requestDate + "\')",
+                                   *pDatabase);
+    }
+    if (type == departure){
+        pQueryModelTable->setQuery("SELECT flight_no, scheduled_departure, ad.airport_name->>\'ru\' as \"Name\" "
+                                   "FROM bookings.flights f "
+                                   "JOIN bookings.airports_data ad on ad.airport_code = f.arrival_airport "
+                                   "WHERE f.departure_airport  = \'" + airportCode + "\' "
+                                   "AND scheduled_departure::date = date(\'" + requestDate + "\')",
+                                   *pDatabase);
+    }
 
     pQueryModelTable->setHeaderData(0, Qt::Horizontal, tr("Номер рейса"));
     pQueryModelTable->setHeaderData(1, Qt::Horizontal, tr("Время вылета"));
-    pQueryModelTable->setHeaderData(2, Qt::Horizontal, tr("Аэропорт отправления"));
-
-//    QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel(nullptr);
-//    proxyModel->setSourceModel(pQueryModelTable);
-//    proxyModel->setFilterKeyColumn(2);
-//    proxyModel->setFilterFixedString("Мирный");
-
-
-
-
+    if (type == arrival){
+        pQueryModelTable->setHeaderData(2, Qt::Horizontal, tr("Аэропорт отправления"));
+    }
+    if (type == departure){
+        pQueryModelTable->setHeaderData(2, Qt::Horizontal, tr("Аэропорт назначения"));
+    }
 
     pTableView->setModel(pQueryModelTable);
     pTableView->hideColumn(0);
 
-    emit sig_SendDataFromDBIn(pTableView);
-}
-
-void DataBase::requestToDBListOut(QString request, QString departureAirport)
-{
-    pQueryModelTable->setQuery(request + "\'" + departureAirport + "\'", *pDatabase);
-
-    pQueryModelTable->setHeaderData(0, Qt::Horizontal, tr("Номер рейса"));
-    pQueryModelTable->setHeaderData(1, Qt::Horizontal, tr("Время вылета"));
-    pQueryModelTable->setHeaderData(2, Qt::Horizontal, tr("Аэропорт назначения"));
-
-    pTableView->setModel(pQueryModelTable);
-    pTableView->hideColumn(0);
-
-    emit sig_SendDataFromDBIn(pTableView);
+    emit sig_SendDataFlightsFromDB(pTableView);
 }
 
 QSqlError DataBase::getLastError()

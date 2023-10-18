@@ -43,4 +43,9 @@ enum fieldsForConnect{
     timeout = 9
 };
 
+enum requestType{
+    arrival = 0,
+    departure = 1
+};
+
 #endif // STRUCTS_H

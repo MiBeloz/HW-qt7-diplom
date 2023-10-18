@@ -33,9 +33,8 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(pTimer, &QTimer::timeout, this, &MainWindow::rec_TimerTimeout);
     QObject::connect(stopConnection, &QPushButton::clicked, this, &MainWindow::rec_on_stopConnection_buttonClicked);
 
-    QObject::connect(pDatabase, &DataBase::sig_SendDataFromDB, this, &MainWindow::rec_SendDataFromDB);
-    QObject::connect(pDatabase, &DataBase::sig_SendDataFromDBIn, this, &MainWindow::rec_SendDataFromDBIn);
-    QObject::connect(pDatabase, &DataBase::sig_SendDataFromDBOut, this, &MainWindow::rec_SendDataFromDBOut);
+    QObject::connect(pDatabase, &DataBase::sig_SendDataAirportsFromDB, this, &MainWindow::rec_sendDataAirportsFromDB);
+    QObject::connect(pDatabase, &DataBase::sig_SendDataFlightsFromDB, this, &MainWindow::rec_sendDataFlightsFromDB);
 
     pSettings->readSettingsAll(dataForApp, dataForConnect);
     pSettings->writeSettingsAll(dataForApp, dataForConnect);
@@ -102,7 +101,7 @@ void MainWindow::rec_StatusConnection(bool status)
         secondsPassed = 0;
         connectionAttempts = 0;
 
-        pDatabase->requestToDBListAirports(queryAirports);
+        pDatabase->requestListAirportsToDB();
     }
     else{
         pixmapStatus.load(":/status/disconnect.png");
@@ -152,29 +151,18 @@ void MainWindow::rec_TimerTimeout()
     }
 }
 
-void MainWindow::rec_SendDataFromDB(const QComboBox *pComboBox)
+void MainWindow::rec_sendDataAirportsFromDB(const QComboBox *pComboBox)
 {
     ui->cbox_listAirports->setModel(pComboBox->model());
-    //ui->cbox_listAirports->model()->sort(1);
-    qDebug() << ui->cbox_listAirports->itemText(0);
-    qDebug() << ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(0,1)).toString();
-    //qDebug() << pDatabase->getLastError().text();
-    qDebug() << ui->dateE_date->text();
 }
 
-void MainWindow::rec_SendDataFromDBIn(const QTableView *pTableView)
-{
-
-
-
-
-
-    ui->tv_flights->setModel(pTableView->model());
-}
-
-void MainWindow::rec_SendDataFromDBOut(const QTableView *pTableView)
+void MainWindow::rec_sendDataFlightsFromDB(const QTableView *pTableView)
 {
     ui->tv_flights->setModel(pTableView->model());
+
+    ui->tv_flights->resizeColumnToContents(0);
+    ui->tv_flights->resizeColumnToContents(1);
+    ui->tv_flights->resizeColumnToContents(2);
 }
 
 void MainWindow::rec_on_pMsg_buttonClicked()
@@ -238,10 +226,23 @@ void MainWindow::moveToTopCenter()
 
 void MainWindow::on_pb_getFlight_clicked()
 {
+    QString requestDate = ui->dateE_date->text().mid(6) + '-' + ui->dateE_date->text().mid(3, 2) + '-' + ui->dateE_date->text().mid(0, 2);
+
+    qDebug() << "on_pb_getFlight_clicked-------------------------";
+    qDebug() << "airport = " + ui->cbox_listAirports->itemText(ui->cbox_listAirports->currentIndex());
+    qDebug() << "airportCode = " + ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString();
+    qDebug() << "date = " + ui->dateE_date->text();
+    qDebug() << "requestDate = " + requestDate;
+    qDebug() << "------------------------------------------------";
+
     if (ui->rb_in->isChecked()){
-        pDatabase->requestToDBListIn(queryArrival, ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());
+        pDatabase->requestListFlightsToDB(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString(),
+                                          requestDate,
+                                          arrival);
     }
     if (ui->rb_out->isChecked()){
-        pDatabase->requestToDBListOut(queryDeparture, ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());
+        pDatabase->requestListFlightsToDB(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString(),
+                                          requestDate,
+                                          departure);
     }
 }
