@@ -34,7 +34,7 @@ signals:
    void sig_SendDataAirportsFromDB(const QComboBox *pComboBox);
    void sig_SendDataFlightsFromDB(const QTableView *pTableView);
    void sig_SendStatusConnection(bool);
-   void sig_SendCongestionYear(QMap<QString, QString> requestResult);
+   void sig_SendCongestionYear(QVector<QPair<QString, QString>> requestResult);
 
 private:
     QSqlDatabase* pDatabase;

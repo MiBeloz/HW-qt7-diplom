@@ -19,7 +19,7 @@ public:
     ~GraphicWindow();
 
 public slots:
-    void rec_sendStatYear(QMap<QString, QString> result);
+    void rec_sendStatYear(QVector<QPair<QString, QString>> result);
 
 private slots:
     void on_pb_exit_clicked();

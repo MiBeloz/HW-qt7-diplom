@@ -96,20 +96,66 @@ void DataBase::requestCongestionYear(QString airportCode)
                        "FROM bookings.flights f "
                        "WHERE (scheduled_departure::date > date(\'2016-08-31\') "
                        "and scheduled_departure::date <= date(\'2017-08-31\')) "
-                       "and (departure_airport = \'YKS\' or arrival_airport = \'YKS\') "
+                       "and (departure_airport = \'" + airportCode + "\' or arrival_airport = \'" + airportCode + "\') "
                        "GROUP BY \"Month\"");
 
 
 
-    QMap<QString, QString> requestResult;
+    QVector<QPair<QString, QString>> requestResult;
     while(pSqlQuery->next()){
-        QString key = pSqlQuery->value(0).toString();
-        QString value = pSqlQuery->value(1).toString();
+        QString value = pSqlQuery->value(0).toString();
+        QString key = pSqlQuery->value(1).toString();
 
         qDebug() << key;
         qDebug() << value;
 
-        //requestResult.
+        QString keyYear = key.mid(0, 4);
+        QString keyMonth = key.mid(5, 2);
+        int keyMonthInt = keyMonth.toInt();
+
+        switch(keyMonthInt){
+        case(1):
+            key = "Январь";
+            break;
+        case(2):
+            key = "Февраль";
+            break;
+        case(3):
+            key = "Март";
+            break;
+        case(4):
+            key = "Апрель";
+            break;
+        case(5):
+            key = "Май";
+            break;
+        case(6):
+            key = "Июнь";
+            break;
+        case(7):
+            key = "Июль";
+            break;
+        case(8):
+            key = "Август";
+            break;
+        case(9):
+            key = "Сентябрь";
+            break;
+        case(10):
+            key = "Октябрь";
+            break;
+        case(11):
+            key = "Ноябрь";
+            break;
+        case(12):
+            key = "Декабрь";
+            break;
+        }
+
+        qDebug() << key;
+        qDebug() << keyYear;
+
+        requestResult.push_back(qMakePair(key + ' ' + keyYear, value));
     }
 
     emit sig_SendCongestionYear(requestResult);

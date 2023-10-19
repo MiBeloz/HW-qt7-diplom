@@ -16,7 +16,7 @@ GraphicWindow::~GraphicWindow()
     delete graphClass;
 }
 
-void GraphicWindow::rec_sendStatYear(QMap<QString, QString> result)
+void GraphicWindow::rec_sendStatYear(QVector<QPair<QString, QString>> result)
 {
 //    QVector<double> months;
 //    QVector<QString> labels;
@@ -31,7 +31,7 @@ void GraphicWindow::rec_sendStatYear(QMap<QString, QString> result)
     QVector<double> arrivalData;
     for (auto it = result.begin(); it != result.end(); ++it){
         //labels << it.key();
-        arrivalData << it.value().toDouble();
+        //arrivalData << it.value().toDouble();
     }
 
 //    QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
