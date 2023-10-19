@@ -88,30 +88,31 @@ void DataBase::requestListFlightsToDB(QString airportCode, QString requestDate, 
     emit sig_SendDataFlightsFromDB(pTableView);
 }
 
-void DataBase::requestStatYear()
+void DataBase::requestCongestionYear(QString airportCode)
 {
     *pSqlQuery = QSqlQuery(*pDatabase);
 
-    QSqlError err;
-    if(pSqlQuery->exec("SELECT count(flight_no), date_trunc(\'month\', scheduled_departure) as \"Month\" "
+    pSqlQuery->exec("SELECT count(flight_no), date_trunc(\'month\', scheduled_departure) as \"Month\" "
                        "FROM bookings.flights f "
                        "WHERE (scheduled_departure::date > date(\'2016-08-31\') "
                        "and scheduled_departure::date <= date(\'2017-08-31\')) "
                        "and (departure_airport = \'YKS\' or arrival_airport = \'YKS\') "
-                       "GROUP BY \"Month\"") == false){
-        err = pSqlQuery->lastError();
-    }
+                       "GROUP BY \"Month\"");
 
 
-    QMap<QString, QString> value;
+
+    QMap<QString, QString> requestResult;
     while(pSqlQuery->next()){
-        QString val0 = pSqlQuery->value(0).toString();
-        QString val1 = pSqlQuery->value(1).toString();
+        QString key = pSqlQuery->value(0).toString();
+        QString value = pSqlQuery->value(1).toString();
 
-        value.insert(val1, val0);
+        qDebug() << key;
+        qDebug() << value;
+
+        //requestResult.
     }
 
-    sig_SendDataStatYear(value);
+    emit sig_SendCongestionYear(requestResult);
 }
 
 QSqlError DataBase::getLastError()

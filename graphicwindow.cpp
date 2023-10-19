@@ -62,7 +62,7 @@ void GraphicWindow::rec_sendStatYear(QMap<QString, QString> result)
 //    ui->cusPlot_year->yAxis->grid()->setPen(QPen(QColor(130, 130, 130), 0, Qt::SolidLine));
 //    ui->cusPlot_year->yAxis->grid()->setSubGridPen(QPen(QColor(130, 130, 130), 0, Qt::DotLine));
 
-    graphClass->AddDataToGrahp(months, arrivalData);
+    //graphClass->AddDataToGrahp(months, arrivalData);
 
 //    ui->cusPlot_year->legend->setVisible(true);
 //    ui->cusPlot_year->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop|Qt::AlignHCenter);

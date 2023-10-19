@@ -1,8 +1,8 @@
+//#pragma comment(lib,"qcustomplot.h")
 #ifndef GRAPHIC_H
 #define GRAPHIC_H
 
 #include <QObject>
-#include <QMap>
 
 //При использовании динамической библиотеки необходимо подключить заголовочный файл,
 //но не добавлять его в проект.

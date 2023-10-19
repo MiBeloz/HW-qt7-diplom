@@ -42,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(pDatabase, &DataBase::sig_SendDataAirportsFromDB, this, &MainWindow::rec_sendDataAirportsFromDB);
     QObject::connect(pDatabase, &DataBase::sig_SendDataFlightsFromDB, this, &MainWindow::rec_sendDataFlightsFromDB);
 
-    QObject::connect(pDatabase, &DataBase::sig_SendDataStatYear, pGraphicWindow, &GraphicWindow::rec_sendStatYear);
+    QObject::connect(pDatabase, &DataBase::sig_SendCongestionYear, pGraphicWindow, &GraphicWindow::rec_sendStatYear);
 
     pSettings->readSettingsAll(dataForApp, dataForConnect);
     pSettings->writeSettingsAll(dataForApp, dataForConnect);
@@ -292,5 +292,5 @@ void MainWindow::on_pb_clear_tv_flights_clicked()
 void MainWindow::on_pb_congestion_clicked()
 {
     pGraphicWindow->show();
-    pDatabase->requestStatYear();
+    pDatabase->requestCongestionYear(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());
 }

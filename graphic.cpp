@@ -77,7 +77,7 @@ void Graphic::AddDataToGrahp(QVector<double> months, QVector<double> arrivalData
     //ptrGraph[numGraph]->addData(x,y);
 
 
-    pArrival->setData(months, arrivalData);
+    //pArrival->setData(months, arrivalData);
 }
 
 ///*!
