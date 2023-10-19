@@ -8,12 +8,14 @@ DataBase::DataBase(QObject *parent)
     pQueryModelAirports = new QSqlQueryModel(this);
     pTableView = new QTableView(nullptr);
     pComboBox = new QComboBox(nullptr);
+    pSqlQuery = new QSqlQuery;
 }
 
 DataBase::~DataBase()
 {
     delete pTableView;
     delete pComboBox;
+    delete pSqlQuery;
     delete pDatabase;
 }
 
@@ -52,7 +54,7 @@ void DataBase::requestListAirportsToDB()
     emit sig_SendDataAirportsFromDB(pComboBox);
 }
 
-void DataBase::requestListFlightsToDB(QString airportCode, QString requestDate, requestType type)
+void DataBase::requestListFlightsToDB(QString airportCode, QString requestDate, routeType type)
 {
     if (type == arrival){
         pQueryModelTable->setQuery("SELECT flight_no, scheduled_arrival, ad.airport_name->>\'ru\' as \"Name\" "
@@ -84,6 +86,32 @@ void DataBase::requestListFlightsToDB(QString airportCode, QString requestDate, 
     pTableView->hideColumn(0);
 
     emit sig_SendDataFlightsFromDB(pTableView);
+}
+
+void DataBase::requestStatYear()
+{
+    *pSqlQuery = QSqlQuery(*pDatabase);
+
+    QSqlError err;
+    if(pSqlQuery->exec("SELECT count(flight_no), date_trunc(\'month\', scheduled_departure) as \"Month\" "
+                       "FROM bookings.flights f "
+                       "WHERE (scheduled_departure::date > date(\'2016-08-31\') "
+                       "and scheduled_departure::date <= date(\'2017-08-31\')) "
+                       "and (departure_airport = \'YKS\' or arrival_airport = \'YKS\') "
+                       "GROUP BY \"Month\"") == false){
+        err = pSqlQuery->lastError();
+    }
+
+
+    QMap<QString, QString> value;
+    while(pSqlQuery->next()){
+        QString val0 = pSqlQuery->value(0).toString();
+        QString val1 = pSqlQuery->value(1).toString();
+
+        value.insert(val1, val0);
+    }
+
+    sig_SendDataStatYear(value);
 }
 
 QSqlError DataBase::getLastError()

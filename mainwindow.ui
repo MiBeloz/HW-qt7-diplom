@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>721</width>
-    <height>513</height>
+    <width>718</width>
+    <height>548</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,8 +18,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>480</width>
-    <height>360</height>
+    <width>0</width>
+    <height>0</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -96,6 +96,16 @@
            <layout class="QVBoxLayout" name="verticalLayout_7">
             <item>
              <widget class="QDateEdit" name="de_departureDate">
+              <property name="dateTime">
+               <datetime>
+                <hour>0</hour>
+                <minute>0</minute>
+                <second>0</second>
+                <year>2016</year>
+                <month>8</month>
+                <day>15</day>
+               </datetime>
+              </property>
               <property name="maximumDateTime">
                <datetime>
                 <hour>23</hour>
@@ -108,12 +118,12 @@
               </property>
               <property name="minimumDateTime">
                <datetime>
-                <hour>18</hour>
+                <hour>0</hour>
                 <minute>0</minute>
                 <second>0</second>
                 <year>2016</year>
                 <month>8</month>
-                <day>14</day>
+                <day>15</day>
                </datetime>
               </property>
               <property name="currentSection">
@@ -124,6 +134,9 @@
               </property>
               <property name="calendarPopup">
                <bool>true</bool>
+              </property>
+              <property name="timeSpec">
+               <enum>Qt::TimeZone</enum>
               </property>
              </widget>
             </item>
@@ -150,6 +163,13 @@
           <widget class="QPushButton" name="pb_clear_tv_flights">
            <property name="text">
             <string>Очистить поле расписания рейсов</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pb_congestion">
+           <property name="text">
+            <string>Загруженность</string>
            </property>
           </widget>
          </item>
@@ -184,8 +204,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>721</width>
-     <height>22</height>
+     <width>718</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menubar_file">

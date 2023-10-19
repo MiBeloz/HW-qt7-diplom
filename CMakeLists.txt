@@ -12,8 +12,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Concurrent Sql)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Concurrent Sql)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets PrintSupport Sql)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets PrintSupport Sql)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -27,6 +27,13 @@ set(PROJECT_SOURCES
         formsettings.cpp
         formsettings.h
         formsettings.ui
+        qcustomplot.cpp
+        qcustomplot.h
+        graphic.cpp
+        graphic.h
+        graphicwindow.cpp
+        graphicwindow.h
+        graphicwindow.ui
         structs.h
         images.qrc
 )
@@ -45,7 +52,7 @@ endif()
 
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/PG_Libs)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
-					      Qt${QT_VERSION_MAJOR}::Concurrent
+                                              Qt${QT_VERSION_MAJOR}::PrintSupport
 					      Qt${QT_VERSION_MAJOR}::Sql
 					      libcrypto-3-x64
 					      libiconv-2

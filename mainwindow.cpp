@@ -25,9 +25,10 @@ MainWindow::MainWindow(QWidget *parent)
     pDatabase = new DataBase(this);
     pSettings = new Settings(this);
 
+    pGraphicWindow = new GraphicWindow(this);
+
     QObject::connect(pDatabase, &DataBase::sig_SendStatusConnection, this, &MainWindow::rec_StatusConnection);
     QObject::connect(pSettings, &Settings::sig_ReadyReadSettings, this, &MainWindow::rec_ReadyReadSettings);
-    QObject::connect(pFormSettings, &FormSettings::sig_saveSettings, pSettings, &Settings::writeSettingsAll);
     QObject::connect(pFormSettings, &FormSettings::sig_saveSettings, this, &MainWindow::rec_SaveSettings);
     QObject::connect(pMsg, &QMessageBox::buttonClicked, this, &MainWindow::rec_on_pMsg_buttonClicked);
     QObject::connect(pTimer, &QTimer::timeout, this, &MainWindow::rec_TimerTimeout);
@@ -40,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     QObject::connect(pDatabase, &DataBase::sig_SendDataAirportsFromDB, this, &MainWindow::rec_sendDataAirportsFromDB);
     QObject::connect(pDatabase, &DataBase::sig_SendDataFlightsFromDB, this, &MainWindow::rec_sendDataFlightsFromDB);
+
+    QObject::connect(pDatabase, &DataBase::sig_SendDataStatYear, pGraphicWindow, &GraphicWindow::rec_sendStatYear);
 
     pSettings->readSettingsAll(dataForApp, dataForConnect);
     pSettings->writeSettingsAll(dataForApp, dataForConnect);
@@ -72,6 +75,8 @@ void MainWindow::rec_SaveSettings(QVector<QString> appSettings, QVector<QString>
 
     dataForApp = std::move(appSettings);
     dataForConnect = std::move(dbSettings);
+
+    pSettings->writeSettingsAll(dataForApp, dataForConnect);
 }
 
 void MainWindow::rec_ReadyReadSettings(QVector<QString> appSettings, QVector<QString> dbSettings)
@@ -282,4 +287,10 @@ void MainWindow::on_pb_clear_tv_flights_clicked()
     ui->tv_flights->setModel(nullptr);
     ui->pb_clear_tv_flights->setEnabled(false);
     ui->pb_getFlights->setEnabled(true);
+}
+
+void MainWindow::on_pb_congestion_clicked()
+{
+    pGraphicWindow->show();
+    pDatabase->requestStatYear();
 }

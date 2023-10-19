@@ -10,10 +10,10 @@
 #include <QMessageBox>
 #include <QTimer>
 
-
 #include "database.h"
 #include "settings.h"
 #include "formsettings.h"
+#include "graphicwindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -47,6 +47,8 @@ private slots:
 
     void on_pb_clear_tv_flights_clicked();
 
+    void on_pb_congestion_clicked();
+
 private:
     Ui::MainWindow *ui;
     QMessageBox *pMsg;
@@ -56,6 +58,7 @@ private:
     QVector<QString> dataForApp;
     Settings *pSettings;
     DataBase *pDatabase;
+    GraphicWindow *pGraphicWindow;
 
     QLabel lb_statusPixmap;
     QLabel lb_statusText;
