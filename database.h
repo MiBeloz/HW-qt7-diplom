@@ -2,6 +2,7 @@
 #define DATABASE_H
 
 #include <QObject>
+#include <QDebug>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQueryModel>
@@ -24,17 +25,19 @@ public:
     void addDatabaseData(QVector<QString> dataForConnect);
     void connectToDatabase();
     void disconnectFromDatabase();
-    void requestListAirportsToDB();
-    void requestListFlightsToDB(QString airportCode, QString requestDate, routeType type);
+    void requestListAirports();
+    void requestListFlights(QString airportCode, QString requestDate, routeType type);
     void requestCongestionYear(QString airportCode);
+    void requestCongestionDayForYear(QString airportCode);
     QSqlError getLastError(void);
     bool isChange(QVector<QString> dataForConnect);
 
 signals:
-   void sig_SendDataAirportsFromDB(const QComboBox *pComboBox);
-   void sig_SendDataFlightsFromDB(const QTableView *pTableView);
+   void sig_SendDataAirports(const QComboBox *pComboBox);
+   void sig_SendDataFlights(const QTableView *pTableView);
    void sig_SendStatusConnection(bool);
    void sig_SendCongestionYear(QVector<QPair<QString, QString>> requestResult);
+   void sig_SendCongestionDayForYear(QVector<QPair<QString, QString>> requestResult);
 
 private:
     QSqlDatabase* pDatabase;
@@ -42,7 +45,10 @@ private:
     QSqlQueryModel *pQueryModelAirports;
     QTableView *pTableView;
     QComboBox *pComboBox;
-    QSqlQuery *pSqlQuery;
+    QSqlQuery *pSqlQueryStatYear;
+    QSqlQuery *pSqlQueryStatDaysForYear;
+
+    QString intToStrMonth(int month);
 };
 
 #endif // DATABASE_H

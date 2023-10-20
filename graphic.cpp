@@ -1,111 +1,154 @@
 #include "graphic.h"
 
-Graphic::Graphic(QCustomPlot* customPlot)
+Graphic::Graphic(QCustomPlot* customPlotBars, QCustomPlot* customPlotGraph)
 {
-   pArrival = new QCPBars(customPlot->xAxis, customPlot->yAxis);
-   //pDeparture = new QCPBars(customPlot->xAxis, customPlot->yAxis);
+    pGraphicBars = new QCPBars(customPlotBars->xAxis, customPlotBars->yAxis);
+    pGraphicBars->setAntialiased(false);  // gives more crisp, pixel aligned bar borders
+    pGraphicBars->setStackingGap(1);
+    // set names and colors:
+    pGraphicBars->setName("Прилеты/Вылеты за год");
+    pGraphicBars->setPen(QPen(QColor(0, 168, 140).lighter(130)));
+    pGraphicBars->setBrush(QColor(0, 168, 140));
 
-   pArrival->setAntialiased(false);  // gives more crisp, pixel aligned bar borders
-   //pDeparture->setAntialiased(false);
-   pArrival->setStackingGap(1);
-   //pDeparture->setStackingGap(1);
-
-   // set names and colors:
-   pArrival->setName("Прилеты");
-   pArrival->setPen(QPen(QColor(0, 168, 140).lighter(130)));
-   pArrival->setBrush(QColor(0, 168, 140));
-//   pDeparture->setName("Вылеты");
-//   pDeparture->setPen(QPen(QColor(250, 170, 20).lighter(150)));
-//   pDeparture->setBrush(QColor(250, 170, 20));
-
-   // stack bars on top of each other:
-   //pArrival->moveAbove(pDeparture);
-
-   // prepare x axis with country labels:
-   QVector<double> months;
-   QVector<QString> labels;
-   months << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 11 << 12;
-   labels << "Январь" << "Февраль" << "Март" << "Апрель" << "Май" << "Июнь" << "Июль" << "Август" << "Сентябрь" << "Октябрь" << "Ноябрь" << "Декабрь";
-   QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
-   textTicker->addTicks(months, labels);
-   customPlot->xAxis->setTicker(textTicker);
-   customPlot->xAxis->setTickLabelRotation(60);
-   customPlot->xAxis->setSubTicks(false);
-   customPlot->xAxis->setTickLength(0, 4);
-   customPlot->xAxis->setRange(0, 8);
-   customPlot->xAxis->setBasePen(QPen(Qt::white));
-   customPlot->xAxis->setTickPen(QPen(Qt::white));
-   customPlot->xAxis->grid()->setVisible(true);
-   customPlot->xAxis->grid()->setPen(QPen(QColor(130, 130, 130), 0, Qt::DotLine));
-   customPlot->xAxis->setTickLabelColor(Qt::white);
-   customPlot->xAxis->setLabelColor(Qt::white);
-
-   // prepare y axis:
-   customPlot->yAxis->setRange(0, 12.1);
-   customPlot->yAxis->setPadding(5); // a bit more space to the left border
-   customPlot->yAxis->setLabel("Power Consumption in\nKilowatts per Capita (2007)");
-   customPlot->yAxis->setBasePen(QPen(Qt::white));
-   customPlot->yAxis->setTickPen(QPen(Qt::white));
-   customPlot->yAxis->setSubTickPen(QPen(Qt::white));
-   customPlot->yAxis->grid()->setSubGridVisible(true);
-   customPlot->yAxis->setTickLabelColor(Qt::white);
-   customPlot->yAxis->setLabelColor(Qt::white);
-   customPlot->yAxis->grid()->setPen(QPen(QColor(130, 130, 130), 0, Qt::SolidLine));
-   customPlot->yAxis->grid()->setSubGridPen(QPen(QColor(130, 130, 130), 0, Qt::DotLine));
-
-   // Add data:
-//   QVector<double> arrivalData, departureData;
-//   arrivalData   << 5 << 6 << 7 << 8 << 9 << 1 << 2 << 7 << 7 << 7 << 77 << 7;
-//   departureData << 5 << 4 << 3 << 2 << 1 << 1 << 2 << 5 << 5 << 5 << 55 << 5;
-//   pArrival->setData(months, arrivalData);
-//   pDeparture->setData(months, departureData);
-
-   // setup legend:
-   customPlot->legend->setVisible(true);
-   customPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop|Qt::AlignHCenter);
-   customPlot->legend->setBrush(QColor(255, 255, 255, 100));
-   customPlot->legend->setBorderPen(Qt::NoPen);
-   customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);  //В отличии от QtCharts QCustomPlot поддерживает встроенные функции масштабирования.
+    pGraphicGraph = new QCPGraph(customPlotGraph->xAxis, customPlotGraph->yAxis);
+    pGraphicGraph->setAntialiased(false);  // gives more crisp, pixel aligned bar borders
+    // set names and colors:
+    pGraphicGraph->setName("Прилеты/Вылеты за год по месяцам");
+    pGraphicGraph->setPen(QPen(QColor(0, 168, 140).lighter(130)));
+    pGraphicGraph->setBrush(QColor(0, 168, 140));
 }
 
-///*!
-//    @brief Метод добавляет данные на график
-//*/
-void Graphic::AddDataToGrahp(QVector<double> months, QVector<double> arrivalData)
+void Graphic::prepareXYaxis(QCustomPlot *customPlot, QVector<QPair<QString, QString> > graphicData, GraphicType graphicType, QString selectMonth)
 {
-    //Добавляем данные на серию
-    //ptrGraph[numGraph]->addData(x,y);
+    // set dark background gradient:
+    QLinearGradient gradient(0, 0, 0, 400);
+    gradient.setColorAt(0, QColor(90, 90, 90));
+    gradient.setColorAt(0.38, QColor(105, 105, 105));
+    gradient.setColorAt(1, QColor(70, 70, 70));
+    customPlot->setBackground(QBrush(gradient));
 
+    if (graphicType == GraphicType::graphicBars){
+        // prepare x axis:
+        QVector<double> months;
+        QVector<QString> labels;
 
-    //pArrival->setData(months, arrivalData);
+        for (int i = 0; i < graphicData.size(); ++i){
+            months << i + 1;
+            labels << graphicData[i].first;
+        }
+
+        QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
+        textTicker->addTicks(months, labels);
+        customPlot->xAxis->setTicker(textTicker);
+        customPlot->xAxis->setTickLabelRotation(80);
+        customPlot->xAxis->setSubTicks(false);
+        customPlot->xAxis->setTickLength(0, 4);
+        customPlot->xAxis->setRange(0, 8);
+        customPlot->xAxis->setBasePen(QPen(Qt::white));
+        customPlot->xAxis->setTickPen(QPen(Qt::white));
+        customPlot->xAxis->grid()->setVisible(true);
+        customPlot->xAxis->grid()->setPen(QPen(QColor(130, 130, 130), 0, Qt::DotLine));
+        customPlot->xAxis->setTickLabelColor(Qt::white);
+        customPlot->xAxis->setLabelColor(Qt::white);
+
+        // prepare y axis:
+        customPlot->yAxis->setRange(0, 12.1);
+        customPlot->yAxis->setPadding(5); // a bit more space to the left border
+        customPlot->yAxis->setLabel("Загруженность(прилеты/вылеты):");
+        customPlot->yAxis->setBasePen(QPen(Qt::white));
+        customPlot->yAxis->setTickPen(QPen(Qt::white));
+        customPlot->yAxis->setSubTickPen(QPen(Qt::white));
+        customPlot->yAxis->grid()->setSubGridVisible(true);
+        customPlot->yAxis->setTickLabelColor(Qt::white);
+        customPlot->yAxis->setLabelColor(Qt::white);
+        customPlot->yAxis->grid()->setPen(QPen(QColor(130, 130, 130), 0, Qt::SolidLine));
+        customPlot->yAxis->grid()->setSubGridPen(QPen(QColor(130, 130, 130), 0, Qt::DotLine));
+    }
+
+    if (graphicType == GraphicType::graphicGraph){
+        // prepare x axis:
+        QVector<double> days;
+        QVector<QString> labels;
+
+        for (int i = 0, j = 0; i < graphicData.size(); ++i){
+            if (graphicData[i].first == selectMonth){
+                days << ++j;
+                labels << QString::number(j);
+            }
+        }
+
+        QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
+        textTicker->addTicks(days, labels);
+        customPlot->xAxis->setTicker(textTicker);
+        customPlot->xAxis->setSubTicks(false);
+        customPlot->xAxis->setTickLength(0, 4);
+        customPlot->xAxis->setRange(0, 8);
+        customPlot->xAxis->setBasePen(QPen(Qt::white));
+        customPlot->xAxis->setTickPen(QPen(Qt::white));
+        customPlot->xAxis->grid()->setVisible(true);
+        customPlot->xAxis->grid()->setPen(QPen(QColor(130, 130, 130), 0, Qt::DotLine));
+        customPlot->xAxis->setTickLabelColor(Qt::white);
+        customPlot->xAxis->setLabelColor(Qt::white);
+
+        // prepare y axis:
+        customPlot->yAxis->setRange(0, 12.1);
+        customPlot->yAxis->setPadding(5); // a bit more space to the left border
+        customPlot->yAxis->setLabel("Загруженность(прилеты/вылеты):");
+        customPlot->yAxis->setBasePen(QPen(Qt::white));
+        customPlot->yAxis->setTickPen(QPen(Qt::white));
+        customPlot->yAxis->setSubTickPen(QPen(Qt::white));
+        customPlot->yAxis->grid()->setSubGridVisible(true);
+        customPlot->yAxis->setTickLabelColor(Qt::white);
+        customPlot->yAxis->setLabelColor(Qt::white);
+        customPlot->yAxis->grid()->setPen(QPen(QColor(130, 130, 130), 0, Qt::SolidLine));
+        customPlot->yAxis->grid()->setSubGridPen(QPen(QColor(130, 130, 130), 0, Qt::DotLine));
+    }
 }
 
-///*!
-//    @brief Метод очищает данные хранящиеся в памяти графиков
-//*/
-//void Graphic::ClearGraph(QCustomPlot* cPlot)
-//{
-//    //Очищаем данные
-//    for(int i = 0; i<ptrGraph.size(); i++){
-//       ptrGraph[i]->data().clear();
-//    }
+void Graphic::AddDataToGrahp(QVector<QPair<QString, QString> > graphicData, GraphicType graphicType, QString selectMonth)
+{
+    if (graphicType == GraphicType::graphicBars){
+        for (int i = 0; i < graphicData.size(); ++i){
+            pGraphicBars->addData(i + 1, graphicData[i].second.toDouble());
+        }
+    }
 
-//    for(int i = 0; i< cPlot->graphCount(); i++){
-//        cPlot->graph(i)->data()->clear();
-//    }
-//    //Обновляем отображение графика
-//    cPlot->replot();
+    if (graphicType == GraphicType::graphicGraph){
+        for (int i = 0, j = 0; i < graphicData.size(); ++i){
+            if (graphicData[i].first == selectMonth){
+                pGraphicGraph->addData(j + 1, graphicData[i].second.toDouble());
+                j++;
+            }
+        }
+    }
+}
 
-//}
+void Graphic::ClearGraph(QCustomPlot* customPlot)
+{
+    for(int i = 0; i< customPlot->graphCount(); i++){
+        customPlot->graph(i)->data()->clear();
+    }
 
-///*!
-//    @brief Слот обновляет отрисовку графика
-//*/
-void Graphic::UpdateGraph(QCustomPlot *cPlot){
-    //Масштабируем оси
-    cPlot->rescaleAxes();
-    //Отрисовываем график
-    cPlot->replot();
+    customPlot->replot();
+}
+
+void Graphic::UpdateGraph(QCustomPlot *customPlot)
+{
+    customPlot->rescaleAxes();
+    customPlot->replot();
+}
+
+void Graphic::setupLegend(QCustomPlot *customPlot)
+{
+    // setup legend:
+    customPlot->legend->setVisible(true);
+    customPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop|Qt::AlignHCenter);
+    customPlot->legend->setBrush(QColor(255, 255, 255, 100));
+    customPlot->legend->setBorderPen(Qt::NoPen);
+    QFont legendFont("Times", 10, QFont::Bold);
+    legendFont.setPointSize(10);
+    customPlot->legend->setFont(legendFont);
+    customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
 }
 
 

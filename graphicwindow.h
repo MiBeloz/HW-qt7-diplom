@@ -19,15 +19,18 @@ public:
     ~GraphicWindow();
 
 public slots:
-    void rec_sendStatYear(QVector<QPair<QString, QString>> result);
+    void rec_sendAirportName(QString airportName);
+    void rec_requestCongestionYear(QVector<QPair<QString, QString>> graphicData);
+    void rec_requestCongestionDayForYear(QVector<QPair<QString, QString>> graphicData);
 
 private slots:
     void on_pb_exit_clicked();
 
 private:
     Ui::GraphicWindow *ui;
-    QCPGraph* graphic;
-    Graphic* graphClass;
+    Graphic *graphic;
+    QVector<QPair<QString, QString> > graphicDataMMM;
+;
 
     QVector<double> ConstructMouse(int numForm, QVector<double> x);
 };

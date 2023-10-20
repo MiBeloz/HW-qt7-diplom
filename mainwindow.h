@@ -27,13 +27,16 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+signals:
+    void sig_sendAirportName(QString airportName);
+
 private slots:
     void rec_SaveSettings(QVector<QString> appSettings, QVector<QString> dbSettings);
     void rec_ReadyReadSettings(QVector<QString> appSettings, QVector<QString> dbSettings);
     void rec_StatusConnection(bool status);
     void rec_TimerTimeout();
-    void rec_sendDataAirportsFromDB(const QComboBox *pComboBox);
-    void rec_sendDataFlightsFromDB(const QTableView *pTableView);
+    void rec_sendDataAirports(const QComboBox *pComboBox);
+    void rec_sendDataFlights(const QTableView *pTableView);
 
     void rec_on_pMsg_buttonClicked();
     void rec_on_stopConnection_buttonClicked();

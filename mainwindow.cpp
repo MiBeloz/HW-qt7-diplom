@@ -39,10 +39,12 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->rb_departure, &QRadioButton::toggled, this, [&]{ui->pb_getFlights->setEnabled(true);});
     QObject::connect(ui->de_departureDate, &QDateEdit::dateChanged, this, [&]{ui->pb_getFlights->setEnabled(true);});
 
-    QObject::connect(pDatabase, &DataBase::sig_SendDataAirportsFromDB, this, &MainWindow::rec_sendDataAirportsFromDB);
-    QObject::connect(pDatabase, &DataBase::sig_SendDataFlightsFromDB, this, &MainWindow::rec_sendDataFlightsFromDB);
+    QObject::connect(pDatabase, &DataBase::sig_SendDataAirports, this, &MainWindow::rec_sendDataAirports);
+    QObject::connect(pDatabase, &DataBase::sig_SendDataFlights, this, &MainWindow::rec_sendDataFlights);
 
-    QObject::connect(pDatabase, &DataBase::sig_SendCongestionYear, pGraphicWindow, &GraphicWindow::rec_sendStatYear);
+    QObject::connect(this, &MainWindow::sig_sendAirportName, pGraphicWindow, &GraphicWindow::rec_sendAirportName);
+    QObject::connect(pDatabase, &DataBase::sig_SendCongestionYear, pGraphicWindow, &GraphicWindow::rec_requestCongestionYear);
+    QObject::connect(pDatabase, &DataBase::sig_SendCongestionDayForYear, pGraphicWindow, &GraphicWindow::rec_requestCongestionDayForYear);
 
     pSettings->readSettingsAll(dataForApp, dataForConnect);
     pSettings->writeSettingsAll(dataForApp, dataForConnect);
@@ -115,7 +117,7 @@ void MainWindow::rec_StatusConnection(bool status)
         secondsPassed = 0;
         connectionAttempts = 0;
 
-        pDatabase->requestListAirportsToDB();
+        pDatabase->requestListAirports();
     }
     else{
         pixmapStatus.load(":/status/disconnect.png");
@@ -165,13 +167,13 @@ void MainWindow::rec_TimerTimeout()
     }
 }
 
-void MainWindow::rec_sendDataAirportsFromDB(const QComboBox *pComboBox)
+void MainWindow::rec_sendDataAirports(const QComboBox *pComboBox)
 {
     ui->cbox_listAirports->setModel(pComboBox->model());
     ui->cbox_listAirports->setCurrentIndex(0);
 }
 
-void MainWindow::rec_sendDataFlightsFromDB(const QTableView *pTableView)
+void MainWindow::rec_sendDataFlights(const QTableView *pTableView)
 {
     ui->tv_flights->setModel(pTableView->model());
 
@@ -253,14 +255,14 @@ void MainWindow::on_pb_getFlights_clicked()
     qDebug() << "------------------------------------------------";
 
     if (ui->rb_arrival->isChecked()){
-        pDatabase->requestListFlightsToDB(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString(),
+        pDatabase->requestListFlights(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString(),
                                           requestDate,
                                           arrival);
 
         ui->pb_getFlights->setEnabled(false);
     }
     if (ui->rb_departure->isChecked()){
-        pDatabase->requestListFlightsToDB(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString(),
+        pDatabase->requestListFlights(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString(),
                                           requestDate,
                                           departure);
 
@@ -291,6 +293,9 @@ void MainWindow::on_pb_clear_tv_flights_clicked()
 
 void MainWindow::on_pb_congestion_clicked()
 {
-    pGraphicWindow->show();
+    emit sig_sendAirportName("Аэропорт: " + ui->cbox_listAirports->itemText(ui->cbox_listAirports->currentIndex()));
     pDatabase->requestCongestionYear(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());
+    pDatabase->requestCongestionDayForYear(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());
+    pGraphicWindow->setModal(true);
+    pGraphicWindow->show();
 }

@@ -8,14 +8,16 @@ DataBase::DataBase(QObject *parent)
     pQueryModelAirports = new QSqlQueryModel(this);
     pTableView = new QTableView(nullptr);
     pComboBox = new QComboBox(nullptr);
-    pSqlQuery = new QSqlQuery;
+    pSqlQueryStatYear = new QSqlQuery;
+    pSqlQueryStatDaysForYear = new QSqlQuery;
 }
 
 DataBase::~DataBase()
 {
     delete pTableView;
     delete pComboBox;
-    delete pSqlQuery;
+    delete pSqlQueryStatYear;
+    delete pSqlQueryStatDaysForYear;
     delete pDatabase;
 }
 
@@ -43,7 +45,7 @@ void DataBase::disconnectFromDatabase()
     pDatabase->close();
 }
 
-void DataBase::requestListAirportsToDB()
+void DataBase::requestListAirports()
 {
     pQueryModelAirports->setQuery("SELECT airport_name->>\'ru\' as \"airportName\", airport_code "
                                   "FROM bookings.airports_data",
@@ -51,10 +53,10 @@ void DataBase::requestListAirportsToDB()
 
     pComboBox->setModel(pQueryModelAirports);
 
-    emit sig_SendDataAirportsFromDB(pComboBox);
+    emit sig_SendDataAirports(pComboBox);
 }
 
-void DataBase::requestListFlightsToDB(QString airportCode, QString requestDate, routeType type)
+void DataBase::requestListFlights(QString airportCode, QString requestDate, routeType type)
 {
     if (type == arrival){
         pQueryModelTable->setQuery("SELECT flight_no, scheduled_arrival, ad.airport_name->>\'ru\' as \"Name\" "
@@ -85,14 +87,14 @@ void DataBase::requestListFlightsToDB(QString airportCode, QString requestDate, 
     pTableView->setModel(pQueryModelTable);
     pTableView->hideColumn(0);
 
-    emit sig_SendDataFlightsFromDB(pTableView);
+    emit sig_SendDataFlights(pTableView);
 }
 
 void DataBase::requestCongestionYear(QString airportCode)
 {
-    *pSqlQuery = QSqlQuery(*pDatabase);
+    *pSqlQueryStatYear = QSqlQuery(*pDatabase);
 
-    pSqlQuery->exec("SELECT count(flight_no), date_trunc(\'month\', scheduled_departure) as \"Month\" "
+    pSqlQueryStatYear->exec("SELECT count(flight_no), date_trunc(\'month\', scheduled_departure) as \"Month\" "
                        "FROM bookings.flights f "
                        "WHERE (scheduled_departure::date > date(\'2016-08-31\') "
                        "and scheduled_departure::date <= date(\'2017-08-31\')) "
@@ -102,9 +104,9 @@ void DataBase::requestCongestionYear(QString airportCode)
 
 
     QVector<QPair<QString, QString>> requestResult;
-    while(pSqlQuery->next()){
-        QString value = pSqlQuery->value(0).toString();
-        QString key = pSqlQuery->value(1).toString();
+    while(pSqlQueryStatYear->next()){
+        QString value = pSqlQueryStatYear->value(0).toString();
+        QString key = pSqlQueryStatYear->value(1).toString();
 
         qDebug() << key;
         qDebug() << value;
@@ -112,53 +114,50 @@ void DataBase::requestCongestionYear(QString airportCode)
         QString keyYear = key.mid(0, 4);
         QString keyMonth = key.mid(5, 2);
         int keyMonthInt = keyMonth.toInt();
-
-        switch(keyMonthInt){
-        case(1):
-            key = "Январь";
-            break;
-        case(2):
-            key = "Февраль";
-            break;
-        case(3):
-            key = "Март";
-            break;
-        case(4):
-            key = "Апрель";
-            break;
-        case(5):
-            key = "Май";
-            break;
-        case(6):
-            key = "Июнь";
-            break;
-        case(7):
-            key = "Июль";
-            break;
-        case(8):
-            key = "Август";
-            break;
-        case(9):
-            key = "Сентябрь";
-            break;
-        case(10):
-            key = "Октябрь";
-            break;
-        case(11):
-            key = "Ноябрь";
-            break;
-        case(12):
-            key = "Декабрь";
-            break;
-        }
+        key = intToStrMonth(keyMonthInt) + ' ' + keyYear;
 
         qDebug() << key;
-        qDebug() << keyYear;
+        qDebug() << value;
 
-        requestResult.push_back(qMakePair(key + ' ' + keyYear, value));
+        requestResult.push_back(qMakePair(key, value));
     }
 
     emit sig_SendCongestionYear(requestResult);
+}
+
+void DataBase::requestCongestionDayForYear(QString airportCode)
+{
+    *pSqlQueryStatDaysForYear = QSqlQuery(*pDatabase);
+
+    pSqlQueryStatDaysForYear->exec("SELECT count(flight_no), date_trunc(\'day\', scheduled_departure) as \"Day\" "
+                                   "FROM bookings.flights f "
+                                   "WHERE (scheduled_departure::date > date(\'2016-08-31\') "
+                                   "and scheduled_departure::date <= date(\'2017-08-31\')) "
+                                   "and (departure_airport = \'" + airportCode + "\' or arrival_airport = \'" + airportCode + "\') "
+                                   "GROUP BY \"Day\"");
+
+
+
+    QVector<QPair<QString, QString>> requestResult;
+    while(pSqlQueryStatDaysForYear->next()){
+        QString value = pSqlQueryStatDaysForYear->value(0).toString();
+        QString key = pSqlQueryStatDaysForYear->value(1).toString();
+
+        qDebug() << key;
+        qDebug() << value;
+
+        QString keyYear = key.mid(0, 4);
+        QString keyMonth = key.mid(5, 2);
+        int keyMonthInt = keyMonth.toInt();
+        key = intToStrMonth(keyMonthInt) + ' ' + keyYear;
+
+        //qDebug() << key;
+        //qDebug() << value;
+
+        requestResult.push_back(qMakePair(key, value));
+    }
+
+    emit sig_SendCongestionDayForYear(requestResult);
 }
 
 QSqlError DataBase::getLastError()
@@ -176,4 +175,36 @@ bool DataBase::isChange(QVector<QString> dataForConnect)
         return true;
     }
     return false;
+}
+
+QString DataBase::intToStrMonth(int month)
+{
+    switch(month){
+    case(1):
+        return "Январь";
+    case(2):
+        return "Февраль";
+    case(3):
+        return "Март";
+    case(4):
+        return "Апрель";
+    case(5):
+        return "Май";
+    case(6):
+        return "Июнь";
+    case(7):
+        return "Июль";
+    case(8):
+        return "Август";
+    case(9):
+        return "Сентябрь";
+    case(10):
+        return "Октябрь";
+    case(11):
+        return "Ноябрь";
+    case(12):
+        return "Декабрь";
+    default:
+        return "Неизвестный месяц";
+    }
 }

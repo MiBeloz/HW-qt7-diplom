@@ -79,7 +79,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QCustomPlot" name="cusPlot_month" native="true"/>
+        <widget class="QCustomPlot" name="cusPlot_day" native="true"/>
        </item>
       </layout>
      </widget>
