@@ -9,8 +9,7 @@
 #include <QComboBox>
 #include <QTableView>
 #include <QSqlQuery>
-
-#include <QSortFilterProxyModel>
+#include <QtConcurrent>
 
 #include "structs.h"
 
@@ -41,12 +40,23 @@ signals:
 
 private:
     QSqlDatabase* pDatabase;
+
     QSqlQueryModel *pQueryModelTable;
     QSqlQueryModel *pQueryModelAirports;
-    QTableView *pTableView;
-    QComboBox *pComboBox;
+
     QSqlQuery *pSqlQueryStatYear;
     QSqlQuery *pSqlQueryStatDaysForYear;
+
+    QTableView *pTableView;
+    QComboBox *pComboBox;
+
+    QFuture<void> ftrQueryModelAirports;
+    QFutureWatcher<void> ftrWtchQueryModelAirports;
+    QFuture<void> ftrQueryModelTable;
+    QFutureWatcher<void> ftrWtchQueryModelTable;
+
+    QFuture<void> ftrSqlQueryStatYear;
+    QFutureWatcher<void> ftrWtchSqlQueryStatYear;
 
     QString intToStrMonth(int month);
 };

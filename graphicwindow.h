@@ -4,7 +4,7 @@
 #include <QDialog>
 
 #include "qcustomplot.h"
-#include "graphic.h"
+//#include "graphic.h"
 
 namespace Ui {
 class GraphicWindow;
@@ -24,15 +24,17 @@ public slots:
     void rec_requestCongestionDayForYear(QVector<QPair<QString, QString>> graphicData);
 
 private slots:
+    void clearAllGraphics();
+    void clearGraphicGraph();
     void on_pb_exit_clicked();
 
 private:
     Ui::GraphicWindow *ui;
-    Graphic *graphic;
-    QVector<QPair<QString, QString> > graphicDataMMM;
-;
+    QCPBars *pGraphicBars;
+    QCPGraph *pGraphicGraph;
 
-    QVector<double> ConstructMouse(int numForm, QVector<double> x);
+    QVector<QPair<QString, QString> > graphicDataForDay;
+    void displayGraphicForDay(QVector<QPair<QString, QString>> graphicData);
 };
 
 #endif // GRAPHICWINDOW_H

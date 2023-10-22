@@ -9,7 +9,61 @@ DataBase::DataBase(QObject *parent)
     pTableView = new QTableView(nullptr);
     pComboBox = new QComboBox(nullptr);
     pSqlQueryStatYear = new QSqlQuery;
-    pSqlQueryStatDaysForYear = new QSqlQuery;
+    //pSqlQueryStatDaysForYear = new QSqlQuery;
+
+    connect(&ftrWtchQueryModelAirports, &QFutureWatcher<void>::finished, this, [&]{
+        pComboBox->setModel(pQueryModelAirports);
+        emit sig_SendDataAirports(pComboBox);
+    });
+
+    connect(&ftrWtchQueryModelTable, &QFutureWatcher<void>::finished, this, [&]{
+        pTableView->setModel(pQueryModelTable);
+        pTableView->hideColumn(0);
+        emit sig_SendDataFlights(pTableView);
+    });
+
+    connect(&ftrWtchSqlQueryStatYear, &QFutureWatcher<void>::finished, this, [&]{
+        QVector<QPair<QString, QString>> requestResultYear;
+        while(pSqlQueryStatYear->next()){
+            QString value = pSqlQueryStatYear->value(0).toString();
+            QString key = pSqlQueryStatYear->value(1).toString();
+
+            //qDebug() << key;
+            //qDebug() << value;
+
+            QString keyYear = key.mid(0, 4);
+            QString keyMonth = key.mid(5, 2);
+            int keyMonthInt = keyMonth.toInt();
+            key = intToStrMonth(keyMonthInt) + ' ' + keyYear;
+
+            //qDebug() << key;
+            //qDebug() << value;
+
+            requestResultYear.push_back(qMakePair(key, value));
+        }
+
+        QVector<QPair<QString, QString>> requestResultDayForYear;
+        while(pSqlQueryStatDaysForYear->next()){
+            QString value = pSqlQueryStatDaysForYear->value(0).toString();
+            QString key = pSqlQueryStatDaysForYear->value(1).toString();
+
+            //qDebug() << key;
+            //qDebug() << value;
+
+            QString keyYear = key.mid(0, 4);
+            QString keyMonth = key.mid(5, 2);
+            int keyMonthInt = keyMonth.toInt();
+            key = intToStrMonth(keyMonthInt) + ' ' + keyYear;
+
+            //qDebug() << key;
+            //qDebug() << value;
+
+            requestResultDayForYear.push_back(qMakePair(key, value));
+        }
+
+        emit sig_SendCongestionYear(requestResultYear);
+        //emit sig_SendCongestionDayForYear(requestResultDayForYear);
+    });
 }
 
 DataBase::~DataBase()
@@ -17,7 +71,7 @@ DataBase::~DataBase()
     delete pTableView;
     delete pComboBox;
     delete pSqlQueryStatYear;
-    delete pSqlQueryStatDaysForYear;
+    //delete pSqlQueryStatDaysForYear;
     delete pDatabase;
 }
 
@@ -47,117 +101,160 @@ void DataBase::disconnectFromDatabase()
 
 void DataBase::requestListAirports()
 {
-    pQueryModelAirports->setQuery("SELECT airport_name->>\'ru\' as \"airportName\", airport_code "
-                                  "FROM bookings.airports_data",
-                                  *pDatabase);
+    ftrQueryModelAirports = QtConcurrent::run([&]{
+        pQueryModelAirports->setQuery("SELECT airport_name->>\'ru\' as \"airportName\", airport_code "
+                                      "FROM bookings.airports_data "
+                                      "ORDER BY \"airportName\"",
+                                      *pDatabase);
+    });
 
-    pComboBox->setModel(pQueryModelAirports);
-
-    emit sig_SendDataAirports(pComboBox);
+    ftrWtchQueryModelAirports.setFuture(ftrQueryModelAirports);
 }
 
 void DataBase::requestListFlights(QString airportCode, QString requestDate, routeType type)
 {
-    if (type == arrival){
-        pQueryModelTable->setQuery("SELECT flight_no, scheduled_arrival, ad.airport_name->>\'ru\' as \"Name\" "
-                                   "FROM bookings.flights f "
-                                   "JOIN bookings.airports_data ad on ad.airport_code = f.departure_airport "
-                                   "WHERE f.arrival_airport  = \'" + airportCode + "\' "
-                                   "AND scheduled_departure::date = date(\'" + requestDate + "\')",
-                                   *pDatabase);
-    }
-    if (type == departure){
-        pQueryModelTable->setQuery("SELECT flight_no, scheduled_departure, ad.airport_name->>\'ru\' as \"Name\" "
-                                   "FROM bookings.flights f "
-                                   "JOIN bookings.airports_data ad on ad.airport_code = f.arrival_airport "
-                                   "WHERE f.departure_airport  = \'" + airportCode + "\' "
-                                   "AND scheduled_departure::date = date(\'" + requestDate + "\')",
-                                   *pDatabase);
-    }
+    ftrQueryModelTable = QtConcurrent::run([&]{
+        if (type == arrival){
+            pQueryModelTable->setQuery("SELECT flight_no, scheduled_arrival, ad.airport_name->>\'ru\' as \"Name\" "
+                                       "FROM bookings.flights f "
+                                       "JOIN bookings.airports_data ad on ad.airport_code = f.departure_airport "
+                                       "WHERE f.arrival_airport  = \'" + airportCode + "\' "
+                                       "AND scheduled_departure::date = date(\'" + requestDate + "\')",
+                                       *pDatabase);
+        }
+        if (type == departure){
+            pQueryModelTable->setQuery("SELECT flight_no, scheduled_departure, ad.airport_name->>\'ru\' as \"Name\" "
+                                       "FROM bookings.flights f "
+                                       "JOIN bookings.airports_data ad on ad.airport_code = f.arrival_airport "
+                                       "WHERE f.departure_airport  = \'" + airportCode + "\' "
+                                       "AND scheduled_departure::date = date(\'" + requestDate + "\')",
+                                       *pDatabase);
+        }
 
-    pQueryModelTable->setHeaderData(0, Qt::Horizontal, tr("Номер рейса"));
-    pQueryModelTable->setHeaderData(1, Qt::Horizontal, tr("Время вылета"));
-    if (type == arrival){
-        pQueryModelTable->setHeaderData(2, Qt::Horizontal, tr("Аэропорт отправления"));
-    }
-    if (type == departure){
-        pQueryModelTable->setHeaderData(2, Qt::Horizontal, tr("Аэропорт назначения"));
-    }
+        pQueryModelTable->setHeaderData(0, Qt::Horizontal, tr("Номер рейса"));
+        pQueryModelTable->setHeaderData(1, Qt::Horizontal, tr("Время вылета"));
 
-    pTableView->setModel(pQueryModelTable);
-    pTableView->hideColumn(0);
+        if (type == arrival){
+            pQueryModelTable->setHeaderData(2, Qt::Horizontal, tr("Аэропорт отправления"));
+        }
+        if (type == departure){
+            pQueryModelTable->setHeaderData(2, Qt::Horizontal, tr("Аэропорт назначения"));
+        }
+    });
 
-    emit sig_SendDataFlights(pTableView);
+    ftrWtchQueryModelTable.setFuture(ftrQueryModelTable);
 }
 
 void DataBase::requestCongestionYear(QString airportCode)
 {
-    *pSqlQueryStatYear = QSqlQuery(*pDatabase);
+    ftrSqlQueryStatYear = QtConcurrent::run([&]{
+        *pSqlQueryStatYear = QSqlQuery(*pDatabase);
 
-    pSqlQueryStatYear->exec("SELECT count(flight_no), date_trunc(\'month\', scheduled_departure) as \"Month\" "
-                       "FROM bookings.flights f "
-                       "WHERE (scheduled_departure::date > date(\'2016-08-31\') "
-                       "and scheduled_departure::date <= date(\'2017-08-31\')) "
-                       "and (departure_airport = \'" + airportCode + "\' or arrival_airport = \'" + airportCode + "\') "
-                       "GROUP BY \"Month\"");
+        pSqlQueryStatYear->exec("SELECT count(flight_no), date_trunc(\'month\', scheduled_departure) as \"Month\" "
+                                "FROM bookings.flights f "
+                                "WHERE (scheduled_departure::date > date(\'2016-08-31\') "
+                                "and scheduled_departure::date <= date(\'2017-08-31\')) "
+                                "and (departure_airport = \'" + airportCode + "\' or arrival_airport = \'" + airportCode + "\') "
+                                "GROUP BY \"Month\"");
+
+//        QVector<QPair<QString, QString>> requestResultYear;
+//        while(pSqlQueryStatYear->next()){
+//            QString value = pSqlQueryStatYear->value(0).toString();
+//            QString key = pSqlQueryStatYear->value(1).toString();
+
+//            //qDebug() << key;
+//            //qDebug() << value;
+
+//            QString keyYear = key.mid(0, 4);
+//            QString keyMonth = key.mid(5, 2);
+//            int keyMonthInt = keyMonth.toInt();
+//            key = intToStrMonth(keyMonthInt) + ' ' + keyYear;
+
+//            //qDebug() << key;
+//            //qDebug() << value;
+
+//            requestResultYear.push_back(qMakePair(key, value));
+//        }
+
+        //qDebug() << pSqlQueryStatYear->isNull(0);
+        while (pSqlQueryStatYear->isNull(0)){
+            //qDebug() << pSqlQueryStatYear->isNull(0);
+
+
+        //while (!pSqlQueryStatYear->isActive()){
+
+            //*pSqlQueryStatDaysForYear = QSqlQuery(*pDatabase);
+            pSqlQueryStatDaysForYear->exec("SELECT count(flight_no), date_trunc(\'day\', scheduled_departure) as \"Day\" "
+                                       "FROM bookings.flights f "
+                                       "WHERE (scheduled_departure::date > date(\'2016-08-31\') "
+                                       "and scheduled_departure::date <= date(\'2017-08-31\')) "
+                                       "and (departure_airport = \'" + airportCode + "\' or arrival_airport = \'" + airportCode + "\') "
+                                       "GROUP BY \"Day\"");
 
 
 
-    QVector<QPair<QString, QString>> requestResult;
-    while(pSqlQueryStatYear->next()){
-        QString value = pSqlQueryStatYear->value(0).toString();
-        QString key = pSqlQueryStatYear->value(1).toString();
+//        QVector<QPair<QString, QString>> requestResultDayForYear;
+//        while(pSqlQueryStatYear->next()){
+//            QString value = pSqlQueryStatYear->value(0).toString();
+//            QString key = pSqlQueryStatYear->value(1).toString();
 
-        qDebug() << key;
-        qDebug() << value;
+//            //qDebug() << key;
+//            //qDebug() << value;
 
-        QString keyYear = key.mid(0, 4);
-        QString keyMonth = key.mid(5, 2);
-        int keyMonthInt = keyMonth.toInt();
-        key = intToStrMonth(keyMonthInt) + ' ' + keyYear;
+//            QString keyYear = key.mid(0, 4);
+//            QString keyMonth = key.mid(5, 2);
+//            int keyMonthInt = keyMonth.toInt();
+//            key = intToStrMonth(keyMonthInt) + ' ' + keyYear;
 
-        qDebug() << key;
-        qDebug() << value;
+//            //qDebug() << key;
+//            //qDebug() << value;
 
-        requestResult.push_back(qMakePair(key, value));
-    }
+//            requestResultDayForYear.push_back(qMakePair(key, value));
+//        }
+//            while (pSqlQueryStatDaysForYear->isActive()) {
+//                continue;
+//            }
+        }
 
-    emit sig_SendCongestionYear(requestResult);
+
+    });
+
+    ftrWtchSqlQueryStatYear.setFuture(ftrSqlQueryStatYear);
 }
 
 void DataBase::requestCongestionDayForYear(QString airportCode)
 {
-    *pSqlQueryStatDaysForYear = QSqlQuery(*pDatabase);
+//    *pSqlQueryStatDaysForYear = QSqlQuery(*pDatabase);
 
-    pSqlQueryStatDaysForYear->exec("SELECT count(flight_no), date_trunc(\'day\', scheduled_departure) as \"Day\" "
-                                   "FROM bookings.flights f "
-                                   "WHERE (scheduled_departure::date > date(\'2016-08-31\') "
-                                   "and scheduled_departure::date <= date(\'2017-08-31\')) "
-                                   "and (departure_airport = \'" + airportCode + "\' or arrival_airport = \'" + airportCode + "\') "
-                                   "GROUP BY \"Day\"");
+//    pSqlQueryStatDaysForYear->exec("SELECT count(flight_no), date_trunc(\'day\', scheduled_departure) as \"Day\" "
+//                                   "FROM bookings.flights f "
+//                                   "WHERE (scheduled_departure::date > date(\'2016-08-31\') "
+//                                   "and scheduled_departure::date <= date(\'2017-08-31\')) "
+//                                   "and (departure_airport = \'" + airportCode + "\' or arrival_airport = \'" + airportCode + "\') "
+//                                   "GROUP BY \"Day\"");
 
 
 
-    QVector<QPair<QString, QString>> requestResult;
-    while(pSqlQueryStatDaysForYear->next()){
-        QString value = pSqlQueryStatDaysForYear->value(0).toString();
-        QString key = pSqlQueryStatDaysForYear->value(1).toString();
+//    QVector<QPair<QString, QString>> requestResult;
+//    while(pSqlQueryStatDaysForYear->next()){
+//        QString value = pSqlQueryStatDaysForYear->value(0).toString();
+//        QString key = pSqlQueryStatDaysForYear->value(1).toString();
 
-        qDebug() << key;
-        qDebug() << value;
+//        //qDebug() << key;
+//        //qDebug() << value;
 
-        QString keyYear = key.mid(0, 4);
-        QString keyMonth = key.mid(5, 2);
-        int keyMonthInt = keyMonth.toInt();
-        key = intToStrMonth(keyMonthInt) + ' ' + keyYear;
+//        QString keyYear = key.mid(0, 4);
+//        QString keyMonth = key.mid(5, 2);
+//        int keyMonthInt = keyMonth.toInt();
+//        key = intToStrMonth(keyMonthInt) + ' ' + keyYear;
 
-        //qDebug() << key;
-        //qDebug() << value;
+//        //qDebug() << key;
+//        //qDebug() << value;
 
-        requestResult.push_back(qMakePair(key, value));
-    }
+//        requestResult.push_back(qMakePair(key, value));
+//    }
 
-    emit sig_SendCongestionDayForYear(requestResult);
+//    emit sig_SendCongestionDayForYear(requestResult);
 }
 
 QSqlError DataBase::getLastError()

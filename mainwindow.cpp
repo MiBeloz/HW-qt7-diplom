@@ -295,7 +295,7 @@ void MainWindow::on_pb_congestion_clicked()
 {
     emit sig_sendAirportName("Аэропорт: " + ui->cbox_listAirports->itemText(ui->cbox_listAirports->currentIndex()));
     pDatabase->requestCongestionYear(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());
-    pDatabase->requestCongestionDayForYear(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());
+    //pDatabase->requestCongestionDayForYear(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());
     pGraphicWindow->setModal(true);
     pGraphicWindow->show();
 }

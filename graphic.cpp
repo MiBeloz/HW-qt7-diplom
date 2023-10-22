@@ -4,6 +4,8 @@ Graphic::Graphic(QCustomPlot* customPlotBars, QCustomPlot* customPlotGraph)
 {
     pGraphicBars = new QCPBars(customPlotBars->xAxis, customPlotBars->yAxis);
     pGraphicBars->setAntialiased(false);  // gives more crisp, pixel aligned bar borders
+    pGraphicBars->setAntialiasedFill(true);
+    pGraphicBars->setAntialiasedScatters(true);
     pGraphicBars->setStackingGap(1);
     // set names and colors:
     pGraphicBars->setName("Прилеты/Вылеты за год");
@@ -11,7 +13,10 @@ Graphic::Graphic(QCustomPlot* customPlotBars, QCustomPlot* customPlotGraph)
     pGraphicBars->setBrush(QColor(0, 168, 140));
 
     pGraphicGraph = new QCPGraph(customPlotGraph->xAxis, customPlotGraph->yAxis);
-    pGraphicGraph->setAntialiased(false);  // gives more crisp, pixel aligned bar borders
+    pGraphicGraph->setAntialiased(true);  // gives more crisp, pixel aligned bar borders
+    pGraphicGraph->setAntialiasedFill(true);
+    pGraphicGraph->setAntialiasedScatters(true);
+    pGraphicGraph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ScatterShape::ssDisc));
     // set names and colors:
     pGraphicGraph->setName("Прилеты/Вылеты за год по месяцам");
     pGraphicGraph->setPen(QPen(QColor(0, 168, 140).lighter(130)));
@@ -80,9 +85,11 @@ void Graphic::prepareXYaxis(QCustomPlot *customPlot, QVector<QPair<QString, QStr
         QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
         textTicker->addTicks(days, labels);
         customPlot->xAxis->setTicker(textTicker);
-        customPlot->xAxis->setSubTicks(false);
-        customPlot->xAxis->setTickLength(0, 4);
-        customPlot->xAxis->setRange(0, 8);
+        //customPlot->xAxis->setSubTicks(false);
+        //customPlot->xAxis->setTickLength(0, 4);
+        customPlot->xAxis->setRange(0, 2000);
+        //customPlot->xAxis->setPadding(5);
+        customPlot->xAxis->setLabel("Дни:");
         customPlot->xAxis->setBasePen(QPen(Qt::white));
         customPlot->xAxis->setTickPen(QPen(Qt::white));
         customPlot->xAxis->grid()->setVisible(true);
@@ -91,7 +98,7 @@ void Graphic::prepareXYaxis(QCustomPlot *customPlot, QVector<QPair<QString, QStr
         customPlot->xAxis->setLabelColor(Qt::white);
 
         // prepare y axis:
-        customPlot->yAxis->setRange(0, 12.1);
+        customPlot->yAxis->setRange(0, 20);
         customPlot->yAxis->setPadding(5); // a bit more space to the left border
         customPlot->yAxis->setLabel("Загруженность(прилеты/вылеты):");
         customPlot->yAxis->setBasePen(QPen(Qt::white));
@@ -111,6 +118,8 @@ void Graphic::AddDataToGrahp(QVector<QPair<QString, QString> > graphicData, Grap
         for (int i = 0; i < graphicData.size(); ++i){
             pGraphicBars->addData(i + 1, graphicData[i].second.toDouble());
         }
+
+        emit sig_rescaleAxes();
     }
 
     if (graphicType == GraphicType::graphicGraph){
@@ -120,6 +129,8 @@ void Graphic::AddDataToGrahp(QVector<QPair<QString, QString> > graphicData, Grap
                 j++;
             }
         }
+
+        emit sig_rescaleAxisX();
     }
 }
 
@@ -134,7 +145,6 @@ void Graphic::ClearGraph(QCustomPlot* customPlot)
 
 void Graphic::UpdateGraph(QCustomPlot *customPlot)
 {
-    customPlot->rescaleAxes();
     customPlot->replot();
 }
 

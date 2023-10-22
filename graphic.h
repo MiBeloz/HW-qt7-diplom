@@ -25,6 +25,10 @@ public:
     void ClearGraph(QCustomPlot* customPlot);
     void UpdateGraph(QCustomPlot* customPlot);
 
+signals:
+    void sig_rescaleAxes();
+    void sig_rescaleAxisX();
+
 private:
     QCPBars *pGraphicBars;
     QCPGraph *pGraphicGraph;
