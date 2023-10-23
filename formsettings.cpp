@@ -2,7 +2,7 @@
 #include "ui_formsettings.h"
 
 FormSettings::FormSettings(QWidget *parent) :
-    QDialog(parent),
+    QDialog(parent, Qt::WindowTitleHint),
     ui(new Ui::FormSettings)
 {
     ui->setupUi(this);
@@ -83,7 +83,7 @@ FormSettings::~FormSettings()
     delete ui;
 }
 
-void FormSettings::rec_SendSettings(QVector<QString> appSettings, QVector<QString> dbSettings)
+void FormSettings::rec_sendSettings(QVector<QString> appSettings, QVector<QString> dbSettings)
 {
     if (appSettings[saveFormSize] == "true"){
         ui->chB_saveMainWindowSize->setChecked(true);

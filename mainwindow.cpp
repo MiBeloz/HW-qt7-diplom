@@ -7,7 +7,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    qRegisterMetaType<Qt::Orientation>();
+    this->setWindowIcon(QIcon(":/img/airplane.png"));
+
+    //qRegisterMetaType<Qt::Orientation>();
 
     ui->de_departureDate->setMaximumDateTime(QDateTime(QDate(2017, 9, 14), QTime(23, 55, 0, 0), Qt::TimeSpec::UTC));
     ui->de_departureDate->setMinimumDateTime(QDateTime(QDate(2016, 8, 15), QTime(5, 45, 0, 0), Qt::TimeSpec::UTC));
@@ -19,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->statusbar->addWidget(&lb_statusText);
     ui->statusbar->addWidget(stopConnection);
 
+    pAbout = new About(this);
+
     pMsg = new QMessageBox(this);
     pFormSettings = new FormSettings(this);
     pTimer = new QTimer(this);
@@ -28,33 +32,30 @@ MainWindow::MainWindow(QWidget *parent)
     dataForConnect.resize(NUM_DATA_FOR_CONNECT_TO_DB);
     dataForApp.resize(NUM_DATA_FOR_APP);
 
-    pDatabase = new DataBase(this);
+    pDatabase = new Database(this);
     pSettings = new Settings(this);
 
     pGraphicWindow = new GraphicWindow(this);
 
-    QObject::connect(pDatabase, &DataBase::sig_SendStatusConnection, this, &MainWindow::rec_StatusConnection);
-    QObject::connect(pSettings, &Settings::sig_ReadyReadSettings, this, &MainWindow::rec_ReadyReadSettings);
-    QObject::connect(pFormSettings, &FormSettings::sig_saveSettings, this, &MainWindow::rec_SaveSettings);
+    QObject::connect(pDatabase, &Database::sig_sendStatusConnection, this, &MainWindow::rec_statusConnection);
+    QObject::connect(pSettings, &Settings::sig_readyReadSettings, this, &MainWindow::rec_readyReadSettings);
+    QObject::connect(pFormSettings, &FormSettings::sig_saveSettings, this, &MainWindow::rec_saveSettings);
     QObject::connect(pMsg, &QMessageBox::buttonClicked, this, &MainWindow::rec_on_pMsg_buttonClicked);
-    QObject::connect(pTimer, &QTimer::timeout, this, &MainWindow::rec_TimerTimeout);
+    QObject::connect(pTimer, &QTimer::timeout, this, &MainWindow::rec_timerTimeout);
     QObject::connect(stopConnection, &QPushButton::clicked, this, &MainWindow::rec_on_stopConnection_buttonClicked);
 
     QObject::connect(ui->cbox_listAirports, &QComboBox::currentTextChanged, this, [&]{ui->pb_getFlights->setEnabled(true);});
     QObject::connect(ui->rb_arrival, &QRadioButton::toggled, this, [&]{ui->pb_getFlights->setEnabled(true);});
     QObject::connect(ui->rb_departure, &QRadioButton::toggled, this, [&]{ui->pb_getFlights->setEnabled(true);});
     QObject::connect(ui->de_departureDate, &QDateEdit::dateChanged, this, [&]{ui->pb_getFlights->setEnabled(true);});
-    QObject::connect(ui->cbox_listAirports, &QComboBox::currentTextChanged, this, [&]{
-        pGraphicWindow->clearAllGraphics();
-        emit sig_sendAirportName("Аэропорт: " + ui->cbox_listAirports->itemText(ui->cbox_listAirports->currentIndex()));
-        pDatabase->requestCongestion(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());});
 
-    QObject::connect(pDatabase, &DataBase::sig_SendDataAirports, this, &MainWindow::rec_sendDataAirports);
-    QObject::connect(pDatabase, &DataBase::sig_SendDataFlights, this, &MainWindow::rec_sendDataFlights);
+    QObject::connect(pDatabase, &Database::sig_sendDataAirports, this, &MainWindow::rec_sendDataAirports);
+    QObject::connect(pDatabase, &Database::sig_sendDataFlights, this, &MainWindow::rec_sendDataFlights);
 
     QObject::connect(this, &MainWindow::sig_sendAirportName, pGraphicWindow, &GraphicWindow::rec_sendAirportName);
-    QObject::connect(pDatabase, &DataBase::sig_SendCongestionYear, pGraphicWindow, &GraphicWindow::rec_requestCongestionYear);
-    QObject::connect(pDatabase, &DataBase::sig_SendCongestionDayForYear, pGraphicWindow, &GraphicWindow::rec_requestCongestionDayForYear);
+    QObject::connect(pDatabase, &Database::sig_sendCongestionYear, pGraphicWindow, &GraphicWindow::rec_requestCongestionYear);
+    QObject::connect(pDatabase, &Database::sig_sendCongestionDayForYear, pGraphicWindow, &GraphicWindow::rec_requestCongestionDayForYear);
+    QObject::connect(pDatabase, &Database::sig_sendStatusRequestCongestion, this, &MainWindow::rec_statusRequestCongestion);
 
     pSettings->readSettingsAll(dataForApp, dataForConnect);
     pSettings->writeSettingsAll(dataForApp, dataForConnect);
@@ -71,7 +72,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::rec_SaveSettings(QVector<QString> appSettings, QVector<QString> dbSettings)
+void MainWindow::rec_saveSettings(QVector<QString> appSettings, QVector<QString> dbSettings)
 {
     if (dataForApp[formWidth] != appSettings[formWidth] || dataForApp[formHeight] != appSettings[formHeight]){
         setGeometry(0, 0, appSettings[formWidth].toInt(), appSettings[formHeight].toInt());
@@ -91,7 +92,7 @@ void MainWindow::rec_SaveSettings(QVector<QString> appSettings, QVector<QString>
     pSettings->writeSettingsAll(dataForApp, dataForConnect);
 }
 
-void MainWindow::rec_ReadyReadSettings(QVector<QString> appSettings, QVector<QString> dbSettings)
+void MainWindow::rec_readyReadSettings(QVector<QString> appSettings, QVector<QString> dbSettings)
 {
     dataForApp = std::move(appSettings);
     dataForConnect = std::move(dbSettings);
@@ -106,11 +107,11 @@ void MainWindow::rec_ReadyReadSettings(QVector<QString> appSettings, QVector<QSt
         pDatabase->connectToDatabase();
     }
     else{
-        rec_StatusConnection(false);
+        rec_statusConnection(false);
     }
 }
 
-void MainWindow::rec_StatusConnection(bool status)
+void MainWindow::rec_statusConnection(bool status)
 {
     if (status){
         pixmapStatus.load(":/status/connect.png");
@@ -143,12 +144,12 @@ void MainWindow::rec_StatusConnection(bool status)
         if (lastError != ""){
             pMsg->setIcon(QMessageBox::Critical);
             pMsg->setText(pDatabase->getLastError().text());
-            pMsg->show();
+            pMsg->exec();
         }
     }
 }
 
-void MainWindow::rec_TimerTimeout()
+void MainWindow::rec_timerTimeout()
 {
     secondsPassed += 1;
 
@@ -194,6 +195,16 @@ void MainWindow::rec_sendDataFlights(const QTableView *pTableView)
     ui->pb_clear_tv_flights->setEnabled(true);
 }
 
+void MainWindow::rec_statusRequestCongestion(QSqlError err)
+{
+    if(err.type() != QSqlError::NoError){
+        pDatabase->disconnectFromDatabase();
+        pMsg->setIcon(QMessageBox::Critical);
+        pMsg->setText(err.text());
+        pMsg->exec();
+    }
+}
+
 void MainWindow::rec_on_pMsg_buttonClicked()
 {
     pTimer->start();
@@ -221,36 +232,8 @@ void MainWindow::rec_on_stopConnection_buttonClicked()
 
 void MainWindow::on_menubar_settings_triggered()
 {
-    pFormSettings->rec_SendSettings(dataForApp, dataForConnect);
-    pFormSettings->setModal(true);
-    pFormSettings->show();
-}
-
-void MainWindow::setEnabledWidgets(bool enabled)
-{
-    ui->grB_flights->setEnabled(enabled);
-    ui->grB_selectZone->setEnabled(enabled);
-    ui->grB_actions->setEnabled(enabled);
-}
-
-void MainWindow::resizeEvent(QResizeEvent *event)
-{
-    if (event->type() == QEvent::Resize && dataForApp[saveFormSize] == "true"){
-        dataForApp[formWidth] = QString::number(width());
-        dataForApp[formHeight] = QString::number(height());
-
-        pSettings->writeSettingsApp(dataForApp);
-    }
-}
-
-void MainWindow::moveToTopCenter()
-{
-    auto screen = QGuiApplication::primaryScreen(); //опеределянм главный экран
-    QRect rect = screen->geometry(); //размер экрана
-    QPoint center = rect.center(); //координаты центра экрана
-    center.setX(center.x() - (this->width() / 2));  // учитываем половину ширины окна
-    center.setY(center.y() - (this->height() / 2));  // учитываем половину высоты окна
-    move(center);    //перемещаем
+    pFormSettings->rec_sendSettings(dataForApp, dataForConnect);
+    pFormSettings->exec();
 }
 
 void MainWindow::on_pb_getFlights_clicked()
@@ -293,7 +276,7 @@ void MainWindow::on_menubar_connect_triggered()
 void MainWindow::on_menubar_disconnect_triggered()
 {
     pDatabase->disconnectFromDatabase();
-    rec_StatusConnection(false);
+    rec_statusConnection(false);
 }
 
 void MainWindow::on_pb_clear_tv_flights_clicked()
@@ -305,5 +288,39 @@ void MainWindow::on_pb_clear_tv_flights_clicked()
 
 void MainWindow::on_pb_congestion_clicked()
 {
+    emit sig_sendAirportName("Аэропорт: " + ui->cbox_listAirports->itemText(ui->cbox_listAirports->currentIndex()));
+    pDatabase->requestCongestion(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());
     pGraphicWindow->exec();
+}
+
+void MainWindow::on_menubar_about_triggered()
+{
+    pAbout->exec();
+}
+
+void MainWindow::setEnabledWidgets(bool enabled)
+{
+    ui->grB_flights->setEnabled(enabled);
+    ui->grB_selectZone->setEnabled(enabled);
+    ui->grB_actions->setEnabled(enabled);
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    if (event->type() == QEvent::Resize && dataForApp[saveFormSize] == "true"){
+        dataForApp[formWidth] = QString::number(width());
+        dataForApp[formHeight] = QString::number(height());
+
+        pSettings->writeSettingsApp(dataForApp);
+    }
+}
+
+void MainWindow::moveToTopCenter()
+{
+    auto screen = QGuiApplication::primaryScreen();
+    QRect rect = screen->geometry();
+    QPoint center = rect.center();
+    center.setX(center.x() - (this->width() / 2));
+    center.setY(center.y() - (this->height() / 2));
+    move(center);
 }

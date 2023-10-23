@@ -1,6 +1,9 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
+#define PROG_VER_MAJOR 1
+#define PROG_VER_MINOR 3
+
 #define POSTGRE_DRIVER "QPSQL"
 #define SETTINGS_FILE "settings.ini"
 #define GROUP_MAIN_WINDOW "MainWindowSize"
@@ -46,11 +49,6 @@ enum FieldsForConnect{
 enum RouteType{
     arrival = 0,
     departure = 1
-};
-
-enum CongestionType{
-    requestYear = 0,
-    requestDayForYear = 1
 };
 
 #endif // STRUCTS_H

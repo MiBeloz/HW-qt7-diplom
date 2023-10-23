@@ -132,39 +132,9 @@ void GraphicWindow::rec_requestCongestionDayForYear(QVector<QPair<QString, QStri
     displayGraphicForDay(graphicDataForDay);
 }
 
-void GraphicWindow::clearAllGraphics()
-{
-    for(int i = 0; i < ui->cusPlot_year->graphCount(); i++){
-        ui->cusPlot_year->graph(i)->data()->clear();
-    }
-    ui->cusPlot_year->replot();
-    for(int i = 0; i < ui->cusPlot_day->graphCount(); i++){
-        ui->cusPlot_day->graph(i)->data()->clear();
-    }
-    ui->cusPlot_day->replot();
-
-    pGraphicBars->data()->clear();
-    pGraphicGraph->data()->clear();
-
-    graphicDataForDay.clear();
-
-    ui->cb_month->clear();
-}
-
-void GraphicWindow::clearGraphicGraph()
-{
-    ui->cusPlot_year->replot();
-    for(int i = 0; i < ui->cusPlot_day->graphCount(); i++){
-        ui->cusPlot_day->graph(i)->data()->clear();
-    }
-    ui->cusPlot_day->replot();
-
-    pGraphicGraph->data()->clear();
-}
-
 void GraphicWindow::on_pb_exit_clicked()
 {
-    //clearAllGraphics();
+    clearAllGraphics();
     close();
 }
 
@@ -216,4 +186,34 @@ void GraphicWindow::displayGraphicForDay(QVector<QPair<QString, QString> > graph
     ui->cusPlot_day->yAxis->setRange(0, maxValue * 1.2);
 
     ui->cusPlot_day->replot();
+}
+
+void GraphicWindow::clearAllGraphics()
+{
+    for(int i = 0; i < ui->cusPlot_year->graphCount(); i++){
+        ui->cusPlot_year->graph(i)->data()->clear();
+    }
+    ui->cusPlot_year->replot();
+    for(int i = 0; i < ui->cusPlot_day->graphCount(); i++){
+        ui->cusPlot_day->graph(i)->data()->clear();
+    }
+    ui->cusPlot_day->replot();
+
+    pGraphicBars->data()->clear();
+    pGraphicGraph->data()->clear();
+
+    graphicDataForDay.clear();
+
+    ui->cb_month->clear();
+}
+
+void GraphicWindow::clearGraphicGraph()
+{
+    ui->cusPlot_year->replot();
+    for(int i = 0; i < ui->cusPlot_day->graphCount(); i++){
+        ui->cusPlot_day->graph(i)->data()->clear();
+    }
+    ui->cusPlot_day->replot();
+
+    pGraphicGraph->data()->clear();
 }

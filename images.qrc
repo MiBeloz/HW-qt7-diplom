@@ -3,4 +3,7 @@
         <file>connect.png</file>
         <file>disconnect.png</file>
     </qresource>
+    <qresource prefix="/img">
+        <file>airplane.png</file>
+    </qresource>
 </RCC>

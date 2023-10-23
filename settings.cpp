@@ -71,5 +71,5 @@ void Settings::readSettingsAll(QVector<QString> appSettings, QVector<QString> db
         dbSettings[i] = dbData[i].toString();
     }
 
-    emit sig_ReadyReadSettings(appSettings, dbSettings);
+    emit sig_readyReadSettings(appSettings, dbSettings);
 }

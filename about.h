@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+#include "structs.h"
+
 namespace Ui {
 class About;
 }
@@ -14,6 +16,9 @@ class About : public QDialog
 public:
     explicit About(QWidget *parent = nullptr);
     ~About();
+
+private slots:
+    void on_pb_ok_clicked();
 
 private:
     Ui::About *ui;

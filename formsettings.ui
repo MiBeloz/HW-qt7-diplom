@@ -58,6 +58,15 @@
    </property>
    <item row="0" column="0" colspan="3">
     <widget class="QTabWidget" name="tabWidget_settings">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QTabWidget:tab-bar {alignment: center;}</string>
+     </property>
      <property name="tabPosition">
       <enum>QTabWidget::North</enum>
      </property>
@@ -71,6 +80,9 @@
       <bool>false</bool>
      </property>
      <property name="movable">
+      <bool>false</bool>
+     </property>
+     <property name="tabBarAutoHide">
       <bool>false</bool>
      </property>
      <widget class="QWidget" name="tab_app">
@@ -141,9 +153,24 @@
        </item>
        <item row="2" column="0">
         <widget class="QGroupBox" name="grB_graphics">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="title">
           <string>Графики</string>
          </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>В следующих версиях появятся настройки графиков!)</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item row="0" column="0">
@@ -425,14 +452,19 @@
  </widget>
  <tabstops>
   <tabstop>tabWidget_settings</tabstop>
+  <tabstop>chB_saveMainWindowSize</tabstop>
+  <tabstop>spB_mainWindowWidth</tabstop>
+  <tabstop>spB_mainWindowHeight</tabstop>
   <tabstop>le_hostname</tabstop>
   <tabstop>le_dbName</tabstop>
   <tabstop>spB_port</tabstop>
   <tabstop>le_login</tabstop>
   <tabstop>le_pass</tabstop>
+  <tabstop>chB_showPass</tabstop>
   <tabstop>chB_savePass</tabstop>
   <tabstop>chB_autoConnect</tabstop>
   <tabstop>spB_numOfConnectionAttempts</tabstop>
+  <tabstop>spB_timeout</tabstop>
   <tabstop>pb_save</tabstop>
   <tabstop>pb_default</tabstop>
   <tabstop>pb_cancel</tabstop>

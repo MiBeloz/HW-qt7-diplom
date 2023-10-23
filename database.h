@@ -13,12 +13,12 @@
 
 #include "structs.h"
 
-class DataBase : public QObject
+class Database : public QObject
 {
     Q_OBJECT
 public:
-    explicit DataBase(QObject *parent = nullptr);
-    ~DataBase();
+    explicit Database(QObject *parent = nullptr);
+    ~Database();
 
     void addDatabaseDriver(QString driver);
     void addDatabaseData(QVector<QString> dataForConnect);
@@ -31,11 +31,12 @@ public:
     bool isChange(QVector<QString> dataForConnect);
 
 signals:
-   void sig_SendDataAirports(const QComboBox *pComboBox);
-   void sig_SendDataFlights(const QTableView *pTableView);
-   void sig_SendStatusConnection(bool);
-   void sig_SendCongestionYear(QVector<QPair<QString, QString>> requestResult);
-   void sig_SendCongestionDayForYear(QVector<QPair<QString, QString>> requestResult);
+   void sig_sendDataAirports(const QComboBox *pComboBox);
+   void sig_sendDataFlights(const QTableView *pTableView);
+   void sig_sendStatusConnection(bool);
+   void sig_sendCongestionYear(QVector<QPair<QString, QString>> requestResult);
+   void sig_sendCongestionDayForYear(QVector<QPair<QString, QString>> requestResult);
+   void sig_sendStatusRequestCongestion(QSqlError err);
 
 private:
     QSqlDatabase* pDatabase;

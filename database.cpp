@@ -1,6 +1,6 @@
 #include "database.h"
 
-DataBase::DataBase(QObject *parent)
+Database::Database(QObject *parent)
     : QObject{parent}
 {
     pDatabase = new QSqlDatabase();
@@ -12,13 +12,13 @@ DataBase::DataBase(QObject *parent)
 
     connect(&ftrWtchQueryModelAirports, &QFutureWatcher<void>::finished, this, [&]{
         pComboBox->setModel(pQueryModelAirports);
-        emit sig_SendDataAirports(pComboBox);
+        emit sig_sendDataAirports(pComboBox);
     });
 
     connect(&ftrWtchQueryModelTable, &QFutureWatcher<void>::finished, this, [&]{
         pTableView->setModel(pQueryModelTable);
         pTableView->hideColumn(0);
-        emit sig_SendDataFlights(pTableView);
+        emit sig_sendDataFlights(pTableView);
     });
 
     connect(&ftrWtchSqlQueryYear, &QFutureWatcher<void>::finished, this, [&]{
@@ -26,9 +26,6 @@ DataBase::DataBase(QObject *parent)
         while(pSqlQuery->next()){
             QString value = pSqlQuery->value(0).toString();
             QString key = pSqlQuery->value(1).toString();
-
-            //qDebug() << key;
-            //qDebug() << value;
 
             QString keyYear = key.mid(0, 4);
             QString keyMonth = key.mid(5, 2);
@@ -41,17 +38,20 @@ DataBase::DataBase(QObject *parent)
             requestResult.push_back(qMakePair(key, value));
         }
 
-        emit sig_SendCongestionYear(requestResult);
+        emit sig_sendCongestionYear(requestResult);
 
         ftrSqlQueryDayForYear = QtConcurrent::run([&]{
                 *pSqlQuery = QSqlQuery(*pDatabase);
 
-                pSqlQuery->exec("SELECT count(flight_no), date_trunc(\'day\', scheduled_departure) as \"Day\" "
+                QSqlError err;
+                if(pSqlQuery->exec("SELECT count(flight_no), date_trunc(\'day\', scheduled_departure) as \"Day\" "
                                 "FROM bookings.flights f "
                                 "WHERE (scheduled_departure::date > date(\'2016-08-31\') "
                                 "and scheduled_departure::date <= date(\'2017-08-31\')) "
                                 "and (departure_airport = \'" + m_airportCode + "\' or arrival_airport = \'" + m_airportCode + "\') "
-                                "GROUP BY \"Day\"");
+                                "GROUP BY \"Day\"") == false){
+                    err = pSqlQuery->lastError();
+                    emit sig_sendStatusRequestCongestion(err);}
                 });
 
         ftrWtchSqlQueryDayForYear.setFuture(ftrSqlQueryDayForYear);
@@ -63,9 +63,6 @@ DataBase::DataBase(QObject *parent)
             QString value = pSqlQuery->value(0).toString();
             QString key = pSqlQuery->value(1).toString();
 
-            //qDebug() << key;
-            //qDebug() << value;
-
             QString keyYear = key.mid(0, 4);
             QString keyMonth = key.mid(5, 2);
             int keyMonthInt = keyMonth.toInt();
@@ -77,11 +74,11 @@ DataBase::DataBase(QObject *parent)
             requestResult.push_back(qMakePair(key, value));
         }
 
-        emit sig_SendCongestionDayForYear(requestResult);
+        emit sig_sendCongestionDayForYear(requestResult);
     });
 }
 
-DataBase::~DataBase()
+Database::~Database()
 {
     delete pTableView;
     delete pComboBox;
@@ -89,12 +86,12 @@ DataBase::~DataBase()
     delete pDatabase;
 }
 
-void DataBase::addDatabaseDriver(QString driver)
+void Database::addDatabaseDriver(QString driver)
 {
     *pDatabase = QSqlDatabase::addDatabase(driver);
 }
 
-void DataBase::addDatabaseData(QVector<QString> dataForConnect)
+void Database::addDatabaseData(QVector<QString> dataForConnect)
 {
     pDatabase->setHostName(dataForConnect[hostName]);
     pDatabase->setDatabaseName(dataForConnect[dbName]);
@@ -103,17 +100,17 @@ void DataBase::addDatabaseData(QVector<QString> dataForConnect)
     pDatabase->setPassword(dataForConnect[pass]);
 }
 
-void DataBase::connectToDatabase()
+void Database::connectToDatabase()
 {
-    emit sig_SendStatusConnection(pDatabase->open());
+    emit sig_sendStatusConnection(pDatabase->open());
 }
 
-void DataBase::disconnectFromDatabase()
+void Database::disconnectFromDatabase()
 {
     pDatabase->close();
 }
 
-void DataBase::requestListAirports()
+void Database::requestListAirports()
 {
     ftrQueryModelAirports = QtConcurrent::run([&]{
         pQueryModelAirports->setQuery("SELECT airport_name->>\'ru\' as \"airportName\", airport_code "
@@ -125,7 +122,7 @@ void DataBase::requestListAirports()
     ftrWtchQueryModelAirports.setFuture(ftrQueryModelAirports);
 }
 
-void DataBase::requestListFlights(QString airportCode, QString requestDate, RouteType type)
+void Database::requestListFlights(QString airportCode, QString requestDate, RouteType type)
 {
     ftrQueryModelTable = QtConcurrent::run([&]{
         if (type == arrival){
@@ -135,6 +132,8 @@ void DataBase::requestListFlights(QString airportCode, QString requestDate, Rout
                                        "WHERE f.arrival_airport  = \'" + airportCode + "\' "
                                        "AND scheduled_departure::date = date(\'" + requestDate + "\')",
                                        *pDatabase);
+
+            pQueryModelTable->setHeaderData(2, Qt::Horizontal, tr("Аэропорт отправления"));
         }
         if (type == departure){
             pQueryModelTable->setQuery("SELECT flight_no, scheduled_departure, ad.airport_name->>\'ru\' as \"Name\" "
@@ -143,44 +142,43 @@ void DataBase::requestListFlights(QString airportCode, QString requestDate, Rout
                                        "WHERE f.departure_airport  = \'" + airportCode + "\' "
                                        "AND scheduled_departure::date = date(\'" + requestDate + "\')",
                                        *pDatabase);
+
+            pQueryModelTable->setHeaderData(2, Qt::Horizontal, tr("Аэропорт назначения"));
         }
 
-        pQueryModelTable->setHeaderData(0, Qt::Orientation::Horizontal, tr("Номер рейса"));
-        pQueryModelTable->setHeaderData(1, Qt::Orientation::Horizontal, tr("Время вылета"));
-
-        if (type == arrival){
-            pQueryModelTable->setHeaderData(2, Qt::Orientation::Horizontal, tr("Аэропорт отправления"));
-        }
-        if (type == departure){
-            pQueryModelTable->setHeaderData(2, Qt::Orientation::Horizontal, tr("Аэропорт назначения"));
-        }
+        pQueryModelTable->setHeaderData(0, Qt::Horizontal, tr("Номер рейса"));
+        pQueryModelTable->setHeaderData(1, Qt::Horizontal, tr("Время вылета"));
     });
 
     ftrWtchQueryModelTable.setFuture(ftrQueryModelTable);
 }
 
-void DataBase::requestCongestion(QString airportCode)
+void Database::requestCongestion(QString airportCode)
 {
     m_airportCode = airportCode;
     ftrSqlQueryYear = QtConcurrent::run([&]{
         *pSqlQuery = QSqlQuery(*pDatabase);
-        pSqlQuery->exec("SELECT count(flight_no), date_trunc(\'month\', scheduled_departure) as \"Month\" "
+
+        QSqlError err;
+        if(pSqlQuery->exec("SELECT count(flight_no), date_trunc(\'month\', scheduled_departure) as \"Month\" "
                         "FROM bookings.flights f "
                         "WHERE (scheduled_departure::date > date(\'2016-08-31\') "
                         "and scheduled_departure::date <= date(\'2017-08-31\')) "
                         "and (departure_airport = \'" + m_airportCode + "\' or arrival_airport = \'" + m_airportCode + "\') "
-                        "GROUP BY \"Month\"");
+                        "GROUP BY \"Month\"") == false){
+            err = pSqlQuery->lastError();
+            emit sig_sendStatusRequestCongestion(err);}
         });
 
     ftrWtchSqlQueryYear.setFuture(ftrSqlQueryYear);
 }
 
-QSqlError DataBase::getLastError()
+QSqlError Database::getLastError()
 {
     return pDatabase->lastError();
 }
 
-bool DataBase::isChange(QVector<QString> dataForConnect)
+bool Database::isChange(QVector<QString> dataForConnect)
 {
     if (pDatabase->hostName() != dataForConnect[hostName] ||
         pDatabase->databaseName() != dataForConnect[dbName] ||
@@ -192,7 +190,7 @@ bool DataBase::isChange(QVector<QString> dataForConnect)
     return false;
 }
 
-QString DataBase::intToStrMonth(int month)
+QString Database::intToStrMonth(int month)
 {
     switch(month){
     case(1):

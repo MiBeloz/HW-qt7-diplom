@@ -4,7 +4,6 @@
 #include <QDialog>
 
 #include "qcustomplot.h"
-//#include "graphic.h"
 
 namespace Ui {
 class GraphicWindow;
@@ -18,15 +17,12 @@ public:
     explicit GraphicWindow(QWidget *parent = nullptr);
     ~GraphicWindow();
 
-    void clearAllGraphics();
-
 public slots:
     void rec_sendAirportName(QString airportName);
     void rec_requestCongestionYear(QVector<QPair<QString, QString>> graphicData);
     void rec_requestCongestionDayForYear(QVector<QPair<QString, QString>> graphicData);
 
 private slots:
-    void clearGraphicGraph();
     void on_pb_exit_clicked();
 
 private:
@@ -34,8 +30,11 @@ private:
     QCPBars *pGraphicBars;
     QCPGraph *pGraphicGraph;
 
-    QVector<QPair<QString, QString> > graphicDataForDay;
+    QVector<QPair<QString, QString>> graphicDataForDay;
     void displayGraphicForDay(QVector<QPair<QString, QString>> graphicData);
+
+    void clearAllGraphics();
+    void clearGraphicGraph();
 };
 
 #endif // GRAPHICWINDOW_H
