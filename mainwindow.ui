@@ -96,47 +96,8 @@
            <layout class="QVBoxLayout" name="verticalLayout_7">
             <item>
              <widget class="QDateEdit" name="de_departureDate">
-              <property name="dateTime">
-               <datetime>
-                <hour>0</hour>
-                <minute>0</minute>
-                <second>0</second>
-                <year>2016</year>
-                <month>8</month>
-                <day>15</day>
-               </datetime>
-              </property>
-              <property name="maximumDateTime">
-               <datetime>
-                <hour>23</hour>
-                <minute>59</minute>
-                <second>59</second>
-                <year>2017</year>
-                <month>9</month>
-                <day>14</day>
-               </datetime>
-              </property>
-              <property name="minimumDateTime">
-               <datetime>
-                <hour>0</hour>
-                <minute>0</minute>
-                <second>0</second>
-                <year>2016</year>
-                <month>8</month>
-                <day>15</day>
-               </datetime>
-              </property>
-              <property name="currentSection">
-               <enum>QDateTimeEdit::DaySection</enum>
-              </property>
-              <property name="displayFormat">
-               <string>dd.MM.yyyy</string>
-              </property>
               <property name="calendarPopup">
                <bool>true</bool>
-              </property>
-              <property name="timeSpec">
-               <enum>Qt::TimeZone</enum>
               </property>
              </widget>
             </item>

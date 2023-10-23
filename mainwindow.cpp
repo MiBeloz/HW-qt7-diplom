@@ -7,6 +7,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    qRegisterMetaType<Qt::Orientation>();
+
+    ui->de_departureDate->setMaximumDateTime(QDateTime(QDate(2017, 9, 14), QTime(23, 55, 0, 0), Qt::TimeSpec::UTC));
+    ui->de_departureDate->setMinimumDateTime(QDateTime(QDate(2016, 8, 15), QTime(5, 45, 0, 0), Qt::TimeSpec::UTC));
+    ui->de_departureDate->setDateTime(QDateTime(QDate(2016, 8, 15), QTime(5, 45, 0, 0), Qt::TimeSpec::UTC));
+
     stopConnection = new QPushButton("Отмена", this);
     lb_statusText.setMinimumSize(250, 22);
     ui->statusbar->addWidget(&lb_statusPixmap);
@@ -38,6 +44,10 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->rb_arrival, &QRadioButton::toggled, this, [&]{ui->pb_getFlights->setEnabled(true);});
     QObject::connect(ui->rb_departure, &QRadioButton::toggled, this, [&]{ui->pb_getFlights->setEnabled(true);});
     QObject::connect(ui->de_departureDate, &QDateEdit::dateChanged, this, [&]{ui->pb_getFlights->setEnabled(true);});
+    QObject::connect(ui->cbox_listAirports, &QComboBox::currentTextChanged, this, [&]{
+        pGraphicWindow->clearAllGraphics();
+        emit sig_sendAirportName("Аэропорт: " + ui->cbox_listAirports->itemText(ui->cbox_listAirports->currentIndex()));
+        pDatabase->requestCongestion(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());});
 
     QObject::connect(pDatabase, &DataBase::sig_SendDataAirports, this, &MainWindow::rec_sendDataAirports);
     QObject::connect(pDatabase, &DataBase::sig_SendDataFlights, this, &MainWindow::rec_sendDataFlights);
@@ -252,6 +262,8 @@ void MainWindow::on_pb_getFlights_clicked()
     qDebug() << "airportCode = " + ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString();
     qDebug() << "date = " + ui->de_departureDate->text();
     qDebug() << "requestDate = " + requestDate;
+    qDebug() << "ui->rb_arrival =" << ui->rb_arrival->isChecked();
+    qDebug() << "ui->rb_departure =" << ui->rb_departure->isChecked();
     qDebug() << "------------------------------------------------";
 
     if (ui->rb_arrival->isChecked()){
@@ -293,9 +305,5 @@ void MainWindow::on_pb_clear_tv_flights_clicked()
 
 void MainWindow::on_pb_congestion_clicked()
 {
-    emit sig_sendAirportName("Аэропорт: " + ui->cbox_listAirports->itemText(ui->cbox_listAirports->currentIndex()));
-    pDatabase->requestCongestionYear(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());
-    //pDatabase->requestCongestionDayForYear(ui->cbox_listAirports->model()->data(ui->cbox_listAirports->model()->index(ui->cbox_listAirports->currentIndex(),1)).toString());
-    pGraphicWindow->setModal(true);
-    pGraphicWindow->show();
+    pGraphicWindow->exec();
 }

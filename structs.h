@@ -24,13 +24,13 @@
 #define NUM_DATA_FOR_APP 3
 #define NUM_DATA_FOR_CONNECT_TO_DB 10
 
-enum fieldsAppSettings{
+enum FieldsAppSettings{
     saveFormSize = 0,
     formWidth = 1,
     formHeight = 2,
 };
 
-enum fieldsForConnect{
+enum FieldsForConnect{
     hostName = 0,
     dbName = 1,
     port = 2,
@@ -43,9 +43,14 @@ enum fieldsForConnect{
     timeout = 9
 };
 
-enum routeType{
+enum RouteType{
     arrival = 0,
     departure = 1
+};
+
+enum CongestionType{
+    requestYear = 0,
+    requestDayForYear = 1
 };
 
 #endif // STRUCTS_H

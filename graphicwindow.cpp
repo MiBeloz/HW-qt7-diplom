@@ -164,7 +164,7 @@ void GraphicWindow::clearGraphicGraph()
 
 void GraphicWindow::on_pb_exit_clicked()
 {
-    clearAllGraphics();
+    //clearAllGraphics();
     close();
 }
 

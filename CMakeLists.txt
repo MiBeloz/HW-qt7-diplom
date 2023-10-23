@@ -21,6 +21,9 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
+        about.cpp
+        about.h
+        about.ui
         database.cpp
         database.h
         settings.cpp
@@ -33,8 +36,8 @@ set(PROJECT_SOURCES
         graphicwindow.cpp
         graphicwindow.h
         graphicwindow.ui
-	#qcustomplot.h
-	#qcustomplot.cpp
+        qcustomplot.h
+        qcustomplot.cpp
         structs.h
         images.qrc
 )
@@ -51,14 +54,14 @@ else()
 endif()
 
 
-add_compile_definitions(QCUSTOMPLOT_USE_LIBRARY)
+#add_compile_definitions(QCUSTOMPLOT_USE_LIBRARY)
 
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/PG_Libs)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
 					      Qt${QT_VERSION_MAJOR}::PrintSupport
 					      Qt${QT_VERSION_MAJOR}::Sql
 					      Qt${QT_VERSION_MAJOR}::Concurrent
-					      qcustomplotd2.dll
+                                              #qcustomplotd2.dll
 					      libcrypto-3-x64
 					      libiconv-2
 					      libintl-9

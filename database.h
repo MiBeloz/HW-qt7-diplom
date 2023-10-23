@@ -25,9 +25,8 @@ public:
     void connectToDatabase();
     void disconnectFromDatabase();
     void requestListAirports();
-    void requestListFlights(QString airportCode, QString requestDate, routeType type);
-    void requestCongestionYear(QString airportCode);
-    void requestCongestionDayForYear(QString airportCode);
+    void requestListFlights(QString airportCode, QString requestDate, RouteType type);
+    void requestCongestion(QString airportCode);
     QSqlError getLastError(void);
     bool isChange(QVector<QString> dataForConnect);
 
@@ -41,22 +40,23 @@ signals:
 private:
     QSqlDatabase* pDatabase;
 
-    QSqlQueryModel *pQueryModelTable;
     QSqlQueryModel *pQueryModelAirports;
-
-    QSqlQuery *pSqlQueryStatYear;
-    QSqlQuery *pSqlQueryStatDaysForYear;
-
-    QTableView *pTableView;
-    QComboBox *pComboBox;
-
     QFuture<void> ftrQueryModelAirports;
     QFutureWatcher<void> ftrWtchQueryModelAirports;
+
+    QSqlQueryModel *pQueryModelTable;
     QFuture<void> ftrQueryModelTable;
     QFutureWatcher<void> ftrWtchQueryModelTable;
 
-    QFuture<void> ftrSqlQueryStatYear;
-    QFutureWatcher<void> ftrWtchSqlQueryStatYear;
+    QSqlQuery *pSqlQuery;
+    QFuture<void> ftrSqlQueryYear;
+    QFutureWatcher<void> ftrWtchSqlQueryYear;
+    QFuture<void> ftrSqlQueryDayForYear;
+    QFutureWatcher<void> ftrWtchSqlQueryDayForYear;
+    QString m_airportCode;
+
+    QTableView *pTableView;
+    QComboBox *pComboBox;
 
     QString intToStrMonth(int month);
 };

@@ -18,13 +18,14 @@ public:
     explicit GraphicWindow(QWidget *parent = nullptr);
     ~GraphicWindow();
 
+    void clearAllGraphics();
+
 public slots:
     void rec_sendAirportName(QString airportName);
     void rec_requestCongestionYear(QVector<QPair<QString, QString>> graphicData);
     void rec_requestCongestionDayForYear(QVector<QPair<QString, QString>> graphicData);
 
 private slots:
-    void clearAllGraphics();
     void clearGraphicGraph();
     void on_pb_exit_clicked();
 
