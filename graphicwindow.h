@@ -18,7 +18,7 @@ public:
     ~GraphicWindow();
 
 public slots:
-    void rec_sendAirportName(QString airportName);
+    void rec_airportName(QString airportName);
     void rec_requestCongestionYear(QVector<QPair<QString, QString>> graphicData);
     void rec_requestCongestionDayForYear(QVector<QPair<QString, QString>> graphicData);
 
@@ -29,6 +29,8 @@ private:
     Ui::GraphicWindow *ui;
     QCPBars *pGraphicBars;
     QCPGraph *pGraphicGraph;
+
+    const QString stratMonth = "Январь";
 
     QVector<QPair<QString, QString>> graphicDataForDay;
     void displayGraphicForDay(QVector<QPair<QString, QString>> graphicData);

@@ -2,7 +2,7 @@
 #define STRUCTS_H
 
 #define PROG_VER_MAJOR 1
-#define PROG_VER_MINOR 3
+#define PROG_VER_MINOR 4
 
 #define POSTGRE_DRIVER "QPSQL"
 #define SETTINGS_FILE "settings.ini"

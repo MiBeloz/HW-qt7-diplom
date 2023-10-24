@@ -52,7 +52,7 @@ GraphicWindow::~GraphicWindow()
     delete ui;
 }
 
-void GraphicWindow::rec_sendAirportName(QString airportName)
+void GraphicWindow::rec_airportName(QString airportName)
 {
     ui->lb_airport->setText(airportName);
 }
@@ -106,7 +106,6 @@ void GraphicWindow::rec_requestCongestionYear(QVector<QPair<QString, QString>> g
 
 void GraphicWindow::rec_requestCongestionDayForYear(QVector<QPair<QString, QString> > graphicData)
 {
-    const QString stratMonth = "Январь";
     int index_cb_month = 0;
     if (graphicData.size() > 0){
         QString month = graphicData[0].first;

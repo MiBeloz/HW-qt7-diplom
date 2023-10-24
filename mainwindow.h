@@ -35,8 +35,8 @@ private slots:
     void rec_readyReadSettings(QVector<QString> appSettings, QVector<QString> dbSettings);
     void rec_statusConnection(bool status);
     void rec_timerTimeout();
-    void rec_sendDataAirports(const QComboBox *pComboBox);
-    void rec_sendDataFlights(const QTableView *pTableView);
+    void rec_dataAirports(const QComboBox *pComboBox);
+    void rec_dataFlights(const QTableView *pTableView);
     void rec_statusRequestCongestion(QSqlError err);
 
     void rec_on_pMsg_buttonClicked();

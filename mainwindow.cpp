@@ -9,8 +9,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->setWindowIcon(QIcon(":/img/airplane.png"));
 
-    //qRegisterMetaType<Qt::Orientation>();
-
     ui->de_departureDate->setMaximumDateTime(QDateTime(QDate(2017, 9, 14), QTime(23, 55, 0, 0), Qt::TimeSpec::UTC));
     ui->de_departureDate->setMinimumDateTime(QDateTime(QDate(2016, 8, 15), QTime(5, 45, 0, 0), Qt::TimeSpec::UTC));
     ui->de_departureDate->setDateTime(QDateTime(QDate(2016, 8, 15), QTime(5, 45, 0, 0), Qt::TimeSpec::UTC));
@@ -22,9 +20,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->statusbar->addWidget(stopConnection);
 
     pAbout = new About(this);
-
     pMsg = new QMessageBox(this);
     pFormSettings = new FormSettings(this);
+
     pTimer = new QTimer(this);
     pTimer->setTimerType(Qt::TimerType::PreciseTimer);
     pTimer->setInterval(1000);
@@ -49,10 +47,10 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->rb_departure, &QRadioButton::toggled, this, [&]{ui->pb_getFlights->setEnabled(true);});
     QObject::connect(ui->de_departureDate, &QDateEdit::dateChanged, this, [&]{ui->pb_getFlights->setEnabled(true);});
 
-    QObject::connect(pDatabase, &Database::sig_sendDataAirports, this, &MainWindow::rec_sendDataAirports);
-    QObject::connect(pDatabase, &Database::sig_sendDataFlights, this, &MainWindow::rec_sendDataFlights);
+    QObject::connect(pDatabase, &Database::sig_sendDataAirports, this, &MainWindow::rec_dataAirports);
+    QObject::connect(pDatabase, &Database::sig_sendDataFlights, this, &MainWindow::rec_dataFlights);
 
-    QObject::connect(this, &MainWindow::sig_sendAirportName, pGraphicWindow, &GraphicWindow::rec_sendAirportName);
+    QObject::connect(this, &MainWindow::sig_sendAirportName, pGraphicWindow, &GraphicWindow::rec_airportName);
     QObject::connect(pDatabase, &Database::sig_sendCongestionYear, pGraphicWindow, &GraphicWindow::rec_requestCongestionYear);
     QObject::connect(pDatabase, &Database::sig_sendCongestionDayForYear, pGraphicWindow, &GraphicWindow::rec_requestCongestionDayForYear);
     QObject::connect(pDatabase, &Database::sig_sendStatusRequestCongestion, this, &MainWindow::rec_statusRequestCongestion);
@@ -120,7 +118,6 @@ void MainWindow::rec_statusConnection(bool status)
         lb_statusText.setText("Подключено");
         ui->menubar_settings->setEnabled(true);
         stopConnection->setVisible(false);
-        setEnabledWidgets(true);
         on_pb_clear_tv_flights_clicked();
         ui->menubar_connect->setEnabled(false);
         ui->menubar_disconnect->setEnabled(true);
@@ -178,13 +175,14 @@ void MainWindow::rec_timerTimeout()
     }
 }
 
-void MainWindow::rec_sendDataAirports(const QComboBox *pComboBox)
+void MainWindow::rec_dataAirports(const QComboBox *pComboBox)
 {
     ui->cbox_listAirports->setModel(pComboBox->model());
     ui->cbox_listAirports->setCurrentIndex(0);
+    setEnabledWidgets(true);
 }
 
-void MainWindow::rec_sendDataFlights(const QTableView *pTableView)
+void MainWindow::rec_dataFlights(const QTableView *pTableView)
 {
     ui->tv_flights->setModel(pTableView->model());
 
