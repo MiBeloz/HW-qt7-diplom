@@ -12,7 +12,7 @@ About::About(QWidget *parent) :
     ui->lb_pixmap->setPixmap(pixmap);
 
     ui->lb_text->setText("\tИнспектор Аэропортов\n"
-                          "\tv" + QString::number(PROG_VER_MAJOR) + '.' + QString::number(PROG_VER_MINOR) + "\n"
+                          "\tv" + QString::number(PROG_VER_MAJOR) + '.' + QString::number(PROG_VER_MINOR) + '.' + QString::number(PROG_VER_MICRO) + "\n"
                                                                                                       "\n"
                                                                                                       "\tКурсовая работа"
                                                                                                       "\n"

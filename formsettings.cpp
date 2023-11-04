@@ -46,19 +46,19 @@ FormSettings::FormSettings(QWidget *parent) :
     QObject::connect(ui->spB_mainWindowHeight, &QSpinBox::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-    QObject::connect(ui->le_hostname, &QLineEdit::textEdited, this, [&]{
+    QObject::connect(ui->le_hostname, &QLineEdit::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-    QObject::connect(ui->le_dbName, &QLineEdit::textEdited, this, [&]{
+    QObject::connect(ui->le_dbName, &QLineEdit::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
     QObject::connect(ui->spB_port, &QSpinBox::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-    QObject::connect(ui->le_login, &QLineEdit::textEdited, this, [&]{
+    QObject::connect(ui->le_login, &QLineEdit::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
-    QObject::connect(ui->le_pass, &QLineEdit::textEdited, this, [&]{
+    QObject::connect(ui->le_pass, &QLineEdit::textChanged, this, [&]{
         ui->pb_save->setEnabled(true);
     });
     QObject::connect(ui->chB_showPass, &QCheckBox::stateChanged, this, [&]{
