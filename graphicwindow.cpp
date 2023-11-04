@@ -182,6 +182,7 @@ void GraphicWindow::displayGraphicForDay(QVector<QPair<QString, QString> > graph
             }
         }
     }
+    ui->cusPlot_day->xAxis->setRange(0, pGraphicGraph->dataCount() + 1);
     ui->cusPlot_day->yAxis->setRange(0, maxValue * 1.2);
 
     ui->cusPlot_day->replot();

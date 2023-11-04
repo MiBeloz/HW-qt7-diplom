@@ -54,17 +54,17 @@ endif()
 
 #add_compile_definitions(QCUSTOMPLOT_USE_LIBRARY)
 
-target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/PG_Libs)
+#target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/PG_Libs)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
 					      Qt${QT_VERSION_MAJOR}::PrintSupport
 					      Qt${QT_VERSION_MAJOR}::Sql
-					      Qt${QT_VERSION_MAJOR}::Concurrent
+                                              Qt${QT_VERSION_MAJOR}::Concurrent)
                                               #qcustomplotd2.dll
-					      libcrypto-3-x64
-					      libiconv-2
-					      libintl-9
-					      libpq
-					      libssl-3-x64)
+                                              #libcrypto-3-x64
+                                              #libiconv-2
+                                              #libintl-9
+                                              #libpq
+                                              #libssl-3-x64)
 
 if(${QT_VERSION} VERSION_LESS 6.1.0)
   set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.${PROJ_NAME})

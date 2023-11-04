@@ -3,7 +3,7 @@
 
 #define PROG_VER_MAJOR 1
 #define PROG_VER_MINOR 4
-#define PROG_VER_MICRO 1
+#define PROG_VER_MICRO 2
 
 #define POSTGRE_DRIVER "QPSQL"
 #define SETTINGS_FILE "settings.ini"
